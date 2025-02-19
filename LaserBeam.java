@@ -4,15 +4,14 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
 
-public class LaserBeam extends Thread{
+public class LaserBeam{
+
     private JPanel panel;
     private int xCord;
     private int yCord;
 
     private int width;
     private int height;
-
-    private int topY;
 
     Rectangle2D.Double laserBeam;
 
@@ -33,8 +32,6 @@ public class LaserBeam extends Thread{
 
         width = 10;
         height = 20;
-        
-        topY = yPos;
         
         dy = -0.05f;
         accumulatedMove = 0.0f;
@@ -88,16 +85,6 @@ public class LaserBeam extends Thread{
                 erase();
                 move();
                 draw();
-
-                for (Asteroid asteroid : ObjectStorageManager.getAsteroidsList()) {
-                    if (isCollidingWith(asteroid)) {
-                        this.erase();
-                        asteroid.resetPosition();
-                        stopLaser();
-                        ScoringPanel.addPoints(50);
-                        break;
-                    }
-                }
             }
         Thread.sleep(2);
         this.erase();
@@ -106,9 +93,6 @@ public class LaserBeam extends Thread{
     }
     public Rectangle2D getBounds() {
         return new Rectangle2D.Double(xCord, yCord, width, height);
-    }
-    private boolean isCollidingWith(Asteroid asteroid) {
-        return asteroid.getBounds().intersects(getBounds());
     }
     public void stopLaser(){
         isRunning = false;

@@ -10,11 +10,13 @@ public class ScoringPanel extends JPanel{
     private static JTextField healthTF;
 
     private static int score, health;
+    private static int asteroidCollisionHealth = 50;//health
+    private static int asteroidCollisionPoints = 20;
     
         public ScoringPanel(){
             
             score = 0;
-            health = 10000;
+            health = 300;
     
             scoreL = new JLabel ("Score: ");
             healthL = new JLabel("Health: ");
@@ -28,6 +30,7 @@ public class ScoringPanel extends JPanel{
             healthTF = new JTextField (Integer.toString(score),5);
             healthTF.setEditable(false);
             healthTF.setBackground(Color.CYAN);
+            healthTF.setText("300");
     
             GridLayout gridLayout = new GridLayout(1, 2);
             this.setLayout(gridLayout);
@@ -39,12 +42,17 @@ public class ScoringPanel extends JPanel{
     
         }
     
-    public static void addPoints(int points){
-        score+=points;
+    public static void addPoints(){
+        score+=asteroidCollisionPoints;
         scoreTF.setText(Integer.toString(score));
     }
-    public static void subtractHealth(int points){
-        health-=points;
-        healthTF.setText(Integer.toString(health));
+    public static void yesCollision(){
+        if(!Spaceship.isExploded()){
+            score+=asteroidCollisionPoints;
+            scoreTF.setText(Integer.toString(score));
+
+            health-=asteroidCollisionHealth;
+            healthTF.setText(Integer.toString(health));
+        }
     }
 }

@@ -34,7 +34,6 @@ public class GameWindow extends JFrame
 	private GamePanel gamePanel;
 	private ScoringPanel scorePanel;
 
-	
 
 	@SuppressWarnings({"unchecked"})
 	public GameWindow() {
@@ -91,7 +90,6 @@ public class GameWindow extends JFrame
 
 		gamePanel = new GamePanel();
         gamePanel.setPreferredSize(new Dimension(400, 400));
-		gamePanel.createGameEntities();
 
 		scorePanel = new ScoringPanel();
 		scorePanel.setPreferredSize(new Dimension(150, 150));
@@ -154,6 +152,7 @@ public class GameWindow extends JFrame
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		setVisible(true);
+		gamePanel.createGameEntities();
 
 		// set status bar message
 
@@ -173,7 +172,7 @@ public class GameWindow extends JFrame
 			mainPanel.requestFocus();
 
 		if (command.equals(startB.getText()))
-			gamePanel.drawGameEntities();
+			gamePanel.gameRender();
 
 		if (command.equals(dropAsteroid.getText())){
 			gamePanel.dropAsteroid();
@@ -192,21 +191,21 @@ public class GameWindow extends JFrame
 		String keyText = e.getKeyText(keyCode);
 		keyTF.setText(keyText + " pressed.");
 
-		if (keyCode == KeyEvent.VK_RIGHT) {
-			gamePanel.updateGameEntities(2);
-			gamePanel.drawGameEntities();
+		if (keyCode == KeyEvent.VK_LEFT){
+			gamePanel.updateSpaceship(1);
+			gamePanel.gameRender();
 		}
-		if (keyCode == KeyEvent.VK_LEFT) {
-			gamePanel.updateGameEntities(1);
-			gamePanel.drawGameEntities();
-		}
-		if(keyCode == KeyEvent.VK_UP){
-			gamePanel.updateGameEntities(4);
-			gamePanel.drawGameEntities();
+		if (keyCode == KeyEvent.VK_RIGHT){
+			gamePanel.updateSpaceship(2);
+			gamePanel.gameRender();
 		}
 		if(keyCode == KeyEvent.VK_DOWN){
-			gamePanel.updateGameEntities(3);
-			gamePanel.drawGameEntities();
+			gamePanel.updateSpaceship(3);
+			gamePanel.gameRender();
+		}
+		if(keyCode == KeyEvent.VK_UP){
+			gamePanel.updateSpaceship(4);
+			gamePanel.gameRender();
 		}
 		if(keyCode == KeyEvent.VK_SPACE){
 			gamePanel.shootLaser();

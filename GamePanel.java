@@ -1,3 +1,6 @@
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.util.Random;
 import javax.swing.JPanel;
 
@@ -5,24 +8,44 @@ import javax.swing.JPanel;
  * A component that displays all the game entities
  */
 
-public class GamePanel extends JPanel{
+public class GamePanel extends JPanel implements Runnable{
 
-   public static Spaceship spaceship;
-   private Asteroid asteroid;
+   private final int NUM_ASTEROIDS = 5;
 
+   private Asteroid[] asteroids;
+   //private ArrayList<LaserBeam> laserBeams;
+
+   public Spaceship spaceship;
+
+   private boolean asteroidDropped;
+   private boolean isRunning;
+
+   private final Image backgroundImage;
+   private Thread gameThread;
    private Random random;
 
    public GamePanel(){
+
       spaceship = null;
-      asteroid = null;
+      asteroids = null;
+
+      asteroidDropped = false;
+      isRunning = false;
 
       random = new Random();
+
+      backgroundImage = ImageManager.loadImage("bg2.jpg");
    }
 
    public void createGameEntities(){
       spaceship = new Spaceship(this, 65, 75);
-      asteroid = new Asteroid(this, random.nextInt(400), 36);
-      ObjectStorageManager.getAsteroidsList().add(asteroid);
+      asteroids = new Asteroid[NUM_ASTEROIDS];
+
+      //laserBeams = new ArrayList<>();
+
+      for(int i = 0; i<NUM_ASTEROIDS; i++){
+         asteroids[i] = new Asteroid(this, random.nextInt(this.getWidth()), 10, spaceship);
+      }
    }
 
    public void drawGameEntities(){
@@ -32,58 +55,96 @@ public class GamePanel extends JPanel{
    public void updateGameEntities(int direction){
       if(spaceship == null)
          return;
-
+   
       spaceship.erase();
       spaceship.move(direction);
-   }
-   public void removeLaser(LaserBeam laserBeam){
-      ObjectStorageManager.getLaserBeamList().remove(laserBeam);
-      laserBeam = null;
-   }/*
-   public void removeAsteroid(Asteroid asteroid){
-      asteroids.remove(asteroid);
-      asteroid = null;
-   }*/
-  /* 
-   public void shootLaser(){
-      LaserBeam laserBeam = new LaserBeam(this, spaceship.getXCord() + spaceship.getWidth()/2, (spaceship.getYCord() - spaceship.getHeight()));
-      ObjectStorageManager.getLaserBeamList().add(laserBeam);
-      while(!laserBeam.isOffScreen()){
-         laserBeam.draw();
-         laserBeam.erase();
-         laserBeam.move();
-      }
-      removeLaser(laserBeam);
-   }*/
-   public void shootLaser(){
-      LaserBeam laserBeam = new LaserBeam(this, spaceship.getXCord() + spaceship.getWidth()/2, (spaceship.getYCord() - spaceship.getHeight()));
-      ObjectStorageManager.getLaserBeamList().add(laserBeam);
-      laserBeam.start();
-      ObjectStorageManager.getLaserBeamList().remove(laserBeam);
    }
    public boolean entityCollision(int x1, int y1, int x2, int y2, int width2, int height2){
       if(x1 >= x2 && x1 <= (x2+width2))
          return true;
       return y1 >= y2 && y1 <= (y2+height2);
    }
+
+   //Asteroid
+   //
+   //
    public void dropAsteroid(){
-      if(asteroid!=null){
-         asteroid.start();
+      if(!asteroidDropped){
+         gameThread = new Thread(this);
+         gameThread.start();
+         asteroidDropped = true;
       }
    }
-   /*
-   public void startGameLoop(){
-      gameTimer.start();
+
+   public void gameUpdate(){
+      for(int i = 0; i<NUM_ASTEROIDS; i++){
+         asteroids[i].move();
+      }
    }
-   public void stopGameLoop(){
-      gameTimer.stop();
-   }*/
-/*
-   public boolean isOnBat(int x, int y) {
-      if (bat != null)
-         return bat.isOnBat(x, y);
-      else
-         return false;
-   }*/
+
+   public boolean isOnAsteroid(int x, int y){
+      for(int i = 0; i<NUM_ASTEROIDS; i++){
+         return asteroids[i].isOnAsteroid(x, y);
+      }
+      return false;
+   }
+   //
+   //
+
+   //Spaceship
+   //
+   //
+   public void updateSpaceship(int direction){
+      if(spaceship!=null)
+         spaceship.move(direction);
+   }
+
+   public boolean isOnSpaceShip(int x, int y){
+      return spaceship.isOnSpaceShip(x, y);
+   }
+   //
+   //
+
+   //LaserBeam
+   //
+   //
+   public void shootLaser(){
+      LaserBeam laserBeam = new LaserBeam(this, spaceship.getXCord() + spaceship.getWidth()/2, (spaceship.getYCord() - spaceship.getHeight()));
+   }
+   //
+   //
+
+   public void gameRender(){
+      Graphics g = getGraphics();
+      Graphics2D g2 = (Graphics2D) g;
+      g2.drawImage(backgroundImage, 0, 0, null);
+
+      if(Spaceship.isExploded()){
+         long elapsedTime = System.currentTimeMillis() - spaceship.getExplosionTime();
+         if(elapsedTime > 3000)
+            spaceship.erase();
+            spaceship.setErase(true);
+      }
+      if(spaceship != null && !Spaceship.isExploded() && spaceship.)
+         spaceship.draw();
+
+      if(asteroids != null){
+         for(int i = 0; i<NUM_ASTEROIDS; i++)
+            asteroids[i].draw();
+      }
+   }
+
+   @Override
+   public void run(){
+      try{
+         isRunning = true;
+         while(isRunning){
+            gameUpdate();
+            gameRender();
+            Thread.sleep(50);
+         }
+      }
+      catch(InterruptedException e){}
+   }
 
 }
