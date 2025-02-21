@@ -18,6 +18,7 @@ public class GamePanel extends JPanel implements Runnable{
    public Spaceship spaceship;
 
    private boolean asteroidDropped;
+   private boolean laserShot;
    private boolean isRunning;
 
    private final Image backgroundImage;
@@ -30,6 +31,7 @@ public class GamePanel extends JPanel implements Runnable{
       asteroids = null;
 
       asteroidDropped = false;
+      laserShot = false;
       isRunning = false;
 
       random = new Random();
@@ -75,11 +77,22 @@ public class GamePanel extends JPanel implements Runnable{
          asteroidDropped = true;
       }
    }
+   public void shootLaser(){
+      if(!laserShot){
+         gameThread = new Thread(this);
+         gameThread.start();
+         laserShot = true;
+      }
+   }
 
    public void gameUpdate(){
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i].move();
       }
+   }
+   public void renderLaser(){
+      LaserBeam laserBeam = new LaserBeam(this, spaceship.getXCord()+10, spaceship.getYCord()+7);//25 - 10 /2 = 7.5 ~ 7 or 8
+      laserBeam.move();
    }
 
    public boolean isOnAsteroid(int x, int y){
@@ -105,27 +118,12 @@ public class GamePanel extends JPanel implements Runnable{
    //
    //
 
-   //LaserBeam
-   //
-   //
-   public void shootLaser(){
-      LaserBeam laserBeam = new LaserBeam(this, spaceship.getXCord() + spaceship.getWidth()/2, (spaceship.getYCord() - spaceship.getHeight()));
-   }
-   //
-   //
-
    public void gameRender(){
       Graphics g = getGraphics();
       Graphics2D g2 = (Graphics2D) g;
       g2.drawImage(backgroundImage, 0, 0, null);
 
-      if(Spaceship.isExploded()){
-         long elapsedTime = System.currentTimeMillis() - spaceship.getExplosionTime();
-         if(elapsedTime > 3000)
-            spaceship.erase();
-            spaceship.setErase(true);
-      }
-      if(spaceship != null && !Spaceship.isExploded() && spaceship.)
+      if(spaceship != null)
          spaceship.draw();
 
       if(asteroids != null){

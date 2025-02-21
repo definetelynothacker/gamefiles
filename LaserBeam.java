@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
 
@@ -35,7 +36,6 @@ public class LaserBeam{
         
         dy = -0.05f;
         accumulatedMove = 0.0f;
-
         
     }
 
@@ -71,32 +71,8 @@ public class LaserBeam{
             accumulatedMove = 0.0f;
         }
     }
-
-    public void run () {
-
-        isRunning = true;
-
-        try{
-            while(isRunning){
-                if(isOffScreen()){
-                    erase();
-                    stopLaser();
-                }
-                erase();
-                move();
-                draw();
-            }
-        Thread.sleep(2);
-        this.erase();
-        }
-        catch(InterruptedException e) {}
-    }
     public Rectangle2D getBounds() {
         return new Rectangle2D.Double(xCord, yCord, width, height);
-    }
-    public void stopLaser(){
-        isRunning = false;
-        Thread.interrupted();
     }
     public boolean isOffScreen(){
         return yCord <= 0;

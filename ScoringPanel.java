@@ -47,7 +47,7 @@ public class ScoringPanel extends JPanel{
         scoreTF.setText(Integer.toString(score));
     }
     public static void yesCollision(){
-        if(!Spaceship.isExploded()){
+        if(!Spaceship.getIsExploded()){
             score+=asteroidCollisionPoints;
             scoreTF.setText(Integer.toString(score));
 

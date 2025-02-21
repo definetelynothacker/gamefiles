@@ -208,7 +208,7 @@ public class GameWindow extends JFrame
 			gamePanel.gameRender();
 		}
 		if(keyCode == KeyEvent.VK_SPACE){
-			gamePanel.shootLaser();
+			gamePanel.renderLaser();
 		}
 	}
 	public void keyReleased(KeyEvent e) {

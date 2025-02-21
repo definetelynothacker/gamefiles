@@ -18,12 +18,16 @@ public class Spaceship{//player
     private final int height;
 
     private Rectangle2D.Double spaceship;
-    private Image defaultImage, explosionImage;
+    private Image defaultImage, explosionImage, graveImage;
 
+    //flags
     private static boolean isExploded;
-    private boolean ifErase;
+    private boolean is3SecondsElapsed;
+    private boolean gotTime; 
 
-    private long explosionTime;
+    private long explosionStartTime;
+    private long currentTime;
+    private long timeElapsed;
 
     private final int dx;
     private final int dy;
@@ -35,8 +39,10 @@ public class Spaceship{//player
         panel = p;
 
         bgColor = panel.getBackground();
+
         defaultImage = ImageManager.loadImage("spaceship.png");
         explosionImage = ImageManager.loadImage("explode.png");
+        graveImage = ImageManager.loadImage("grave.png");
 
         score = 0;
         health = 300;
@@ -49,18 +55,28 @@ public class Spaceship{//player
 
         dx = 25;//speed
         dy = 25;//speed
+
+        isExploded = is3SecondsElapsed = gotTime = false;
     }
     public void draw(){
         Graphics g = panel.getGraphics();
         Graphics2D g2 = (Graphics2D) g;
-        
-        if(health>0)
+        if(health>0)//if not dead draw spaceship
             g2.drawImage(defaultImage, xCord, yCord, width, height, null);
-        else{
+        else if(!is3SecondsElapsed){//if dead and time has not crossed 3 seconds draw explosion
             g2.drawImage(explosionImage, xCord, yCord, width, height, null);
             isExploded = true;
-            explosionTime = System.currentTimeMillis();
+            if(!gotTime){
+                explosionStartTime = System.currentTimeMillis();
+                gotTime = true;
+            }
+            currentTime = System.currentTimeMillis();
+            timeElapsed = currentTime - explosionStartTime;
+            if(timeElapsed>3000)
+                is3SecondsElapsed = true;
         }
+        else if(is3SecondsElapsed)//after 3 seconds passed draw grave image
+            g2.drawImage(graveImage, xCord, yCord, width*2, height*2, null);
         g.dispose();
     }
     public void erase(){
@@ -129,16 +145,23 @@ public class Spaceship{//player
     public void setHealth(int health){
         this.health+=health;
     }
-    public void setErase(boolean isEfase){
-        this.ifErase = ifErase;
+    public void setIs3SecondsElapsed(boolean is3SecondsElapsed){
+        this.is3SecondsElapsed = is3SecondsElapsed;
     }
-    public boolean getIfErase(){
-        return ifErase;
+    public void setIsExploded(boolean isExploded){
+        Spaceship.isExploded = isExploded;
     }
-    public long getExplosionTime(){
-        return explosionTime;
+
+    public static boolean getIsExploded(){return Spaceship.isExploded;}
+    public boolean getIs3SecondsElapsed(){return this.is3SecondsElapsed;}
+
+    public long getExplosionStartTime(){
+        return explosionStartTime;
     }
-    public static boolean isExploded(){
-        return Spaceship.isExploded;
+    public void setTimeElapsed(long timeElapsed){
+        this.timeElapsed = timeElapsed;
+    }
+    public long getTimeElapsed(){
+        return this.timeElapsed;
     }
 }

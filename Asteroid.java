@@ -64,7 +64,7 @@ public final class Asteroid{
         int panelHeight = panel.getHeight();
         boolean collision = collidesWithSpaceship();
         
-        if(collision && !Spaceship.isExploded()){
+        if(collision && !Spaceship.getIsExploded()){
             ScoringPanel.yesCollision();//-50 health //+20 score
             spaceship.setHealth(-50);
             spaceship.setScore(20);
