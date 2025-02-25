@@ -23,7 +23,8 @@ public class Spaceship{//player
     //flags
     private static boolean isExploded;
     private boolean is3SecondsElapsed;
-    private boolean gotTime; 
+    private boolean gotTime;
+    private boolean canShoot;
 
     private long explosionStartTime;
     private long currentTime;
@@ -57,6 +58,7 @@ public class Spaceship{//player
         dy = 25;//speed
 
         isExploded = is3SecondsElapsed = gotTime = false;
+        canShoot = true;
     }
     public void draw(){
         Graphics g = panel.getGraphics();
@@ -66,6 +68,7 @@ public class Spaceship{//player
         else if(!is3SecondsElapsed){//if dead and time has not crossed 3 seconds draw explosion
             g2.drawImage(explosionImage, xCord, yCord, width, height, null);
             isExploded = true;
+            canShoot = false;//should only run once to save memory
             if(!gotTime){
                 explosionStartTime = System.currentTimeMillis();
                 gotTime = true;
@@ -121,7 +124,7 @@ public class Spaceship{//player
     }
     public Rectangle2D.Double getBoundingRectangle(){
         return new Rectangle2D.Double (xCord, yCord, width, height);
-        }
+    }
     public boolean isOnSpaceShip(int xCord, int yCord){
         if(spaceship == null)
             return false;
@@ -139,10 +142,14 @@ public class Spaceship{//player
     public int getHeight(){
         return height;
     }
-    public void setScore(int score){
+    public void addScore(int score){
         this.score+=score;
     }
-    public void setHealth(int health){
+
+    public int getScore(){return this.score;}
+    public int getHealth(){return this.health;}
+
+    public void addHealth(int health){
         this.health+=health;
     }
     public void setIs3SecondsElapsed(boolean is3SecondsElapsed){
@@ -163,5 +170,8 @@ public class Spaceship{//player
     }
     public long getTimeElapsed(){
         return this.timeElapsed;
+    }
+    public boolean canShoot(){
+        return this.canShoot;
     }
 }

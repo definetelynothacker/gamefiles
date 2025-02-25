@@ -10,6 +10,7 @@ public class GameWindow extends JFrame
 	// declare instance variables for user interface objects
 
 	// declare labels 
+	public static boolean spacePressed;
 
 	private JLabel statusBarL;
 	private JLabel keyL;
@@ -37,6 +38,8 @@ public class GameWindow extends JFrame
 
 	@SuppressWarnings({"unchecked"})
 	public GameWindow() {
+
+		spacePressed = false;
  
 		setTitle ("A Game with a Bat and an Alien");
 		setSize (650, 650);
@@ -93,8 +96,6 @@ public class GameWindow extends JFrame
 
 		scorePanel = new ScoringPanel();
 		scorePanel.setPreferredSize(new Dimension(150, 150));
-
-
 
 		// create infoPanel
 
@@ -208,7 +209,7 @@ public class GameWindow extends JFrame
 			gamePanel.gameRender();
 		}
 		if(keyCode == KeyEvent.VK_SPACE){
-			gamePanel.renderLaser();
+			spacePressed = true;
 		}
 	}
 	public void keyReleased(KeyEvent e) {

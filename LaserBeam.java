@@ -1,7 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
 
@@ -16,13 +15,14 @@ public class LaserBeam{
 
     Rectangle2D.Double laserBeam;
 
-    //private int dy;
+    //flags
+    private boolean canMove;
+
     private float dy;
-    private float accumulatedMove;
+    public static boolean isCollideWithAsteroid;
+    //private float accumulatedMove;
 
     private Color bgColor;
-
-    boolean isRunning;
 
     public LaserBeam(JPanel p, int xPos, int yPos){
         panel = p;
@@ -34,9 +34,11 @@ public class LaserBeam{
         width = 10;
         height = 20;
         
-        dy = -0.05f;
-        accumulatedMove = 0.0f;
-        
+        dy = 5;
+
+        isCollideWithAsteroid = false;
+        canMove = true;
+        //accumulatedMove = 0.0f;
     }
 
     public void draw(){
@@ -61,18 +63,31 @@ public class LaserBeam{
         g2.fill(new Rectangle2D.Double(xCord, yCord, width, height));
         g.dispose();
     }
-    public void move() {
+    public void move(){
         if (!panel.isVisible()) return;
 
-        accumulatedMove += dy;
-
-        if (accumulatedMove <= -1.0f) {
-            yCord -= 1;
-            accumulatedMove = 0.0f;
+        isCollideWithAsteroid = collidesWithAsteroid();
+        
+        if(canMove)
+            yCord -= dy;
+        else
+            this.erase();
+        if(isCollideWithAsteroid){
+            GamePanel.spaceship.addScore(20);
+            ScoringPanel.addScore();
+            canMove = false;
         }
     }
-    public Rectangle2D getBounds() {
-        return new Rectangle2D.Double(xCord, yCord, width, height);
+    public boolean collidesWithAsteroid(){
+        Rectangle2D.Double myRect = getBoundingRectangle();
+        for(Asteroid asteroid: GamePanel.asteroids){
+            Rectangle2D.Double asteroidRect = asteroid.getBoundingRectangle();
+            return myRect.intersects(asteroidRect);
+        }
+        return false;
+    }
+    public Rectangle2D.Double getBoundingRectangle(){
+        return new Rectangle2D.Double (xCord, yCord, width, height);
     }
     public boolean isOffScreen(){
         return yCord <= 0;

@@ -2,6 +2,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JPanel;
 
 /**
@@ -12,13 +13,10 @@ public class GamePanel extends JPanel implements Runnable{
 
    private final int NUM_ASTEROIDS = 5;
 
-   private Asteroid[] asteroids;
-   //private ArrayList<LaserBeam> laserBeams;
+   public static Asteroid[] asteroids;
+   public static Spaceship spaceship;
+   private CopyOnWriteArrayList<LaserBeam> laserBeams;
 
-   public Spaceship spaceship;
-
-   private boolean asteroidDropped;
-   private boolean laserShot;
    private boolean isRunning;
 
    private final Image backgroundImage;
@@ -29,9 +27,8 @@ public class GamePanel extends JPanel implements Runnable{
 
       spaceship = null;
       asteroids = null;
+      laserBeams = null;
 
-      asteroidDropped = false;
-      laserShot = false;
       isRunning = false;
 
       random = new Random();
@@ -43,7 +40,7 @@ public class GamePanel extends JPanel implements Runnable{
       spaceship = new Spaceship(this, 65, 75);
       asteroids = new Asteroid[NUM_ASTEROIDS];
 
-      //laserBeams = new ArrayList<>();
+      laserBeams = new CopyOnWriteArrayList<>();
 
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i] = new Asteroid(this, random.nextInt(this.getWidth()), 10, spaceship);
@@ -71,30 +68,38 @@ public class GamePanel extends JPanel implements Runnable{
    //
    //
    public void dropAsteroid(){
-      if(!asteroidDropped){
-         gameThread = new Thread(this);
-         gameThread.start();
-         asteroidDropped = true;
+      gameThread = new Thread(this);
+      gameThread.start();
+   }
+   public void createLaser(){
+      LaserBeam newLaserBeam = new LaserBeam(this, spaceship.getXCord()+7, spaceship.getYCord()+25);
+      laserBeams.add(newLaserBeam);
+   }
+   public void moveRenderLaser(){
+      for(LaserBeam laserBeam: laserBeams){
+         laserBeam.draw();
+         laserBeam.move();
+         laserBeam.erase();
       }
    }
-   public void shootLaser(){
-      if(!laserShot){
-         gameThread = new Thread(this);
-         gameThread.start();
-         laserShot = true;
-      }
-   }
-
    public void gameUpdate(){
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i].move();
       }
    }
-   public void renderLaser(){
-      LaserBeam laserBeam = new LaserBeam(this, spaceship.getXCord()+10, spaceship.getYCord()+7);//25 - 10 /2 = 7.5 ~ 7 or 8
-      laserBeam.move();
-   }
+   public void gameRender(){
+      Graphics g = getGraphics();
+      Graphics2D g2 = (Graphics2D) g;
+      g2.drawImage(backgroundImage, 0, 0, null);
 
+      if(spaceship != null)
+         spaceship.draw();
+
+      if(asteroids != null){
+         for(int i = 0; i<NUM_ASTEROIDS; i++)
+            asteroids[i].draw();
+      }
+   }
    public boolean isOnAsteroid(int x, int y){
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          return asteroids[i].isOnAsteroid(x, y);
@@ -118,20 +123,6 @@ public class GamePanel extends JPanel implements Runnable{
    //
    //
 
-   public void gameRender(){
-      Graphics g = getGraphics();
-      Graphics2D g2 = (Graphics2D) g;
-      g2.drawImage(backgroundImage, 0, 0, null);
-
-      if(spaceship != null)
-         spaceship.draw();
-
-      if(asteroids != null){
-         for(int i = 0; i<NUM_ASTEROIDS; i++)
-            asteroids[i].draw();
-      }
-   }
-
    @Override
    public void run(){
       try{
@@ -139,6 +130,11 @@ public class GamePanel extends JPanel implements Runnable{
          while(isRunning){
             gameUpdate();
             gameRender();
+            moveRenderLaser();
+            if(GameWindow.spacePressed && spaceship.canShoot()){
+               createLaser();
+               GameWindow.spacePressed = false;
+            }
             Thread.sleep(50);
          }
       }

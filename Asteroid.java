@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 
 public final class Asteroid{
 
-    private Spaceship spaceship;
+    private final Spaceship spaceship;
     public int xCord;
     public int yCord;
 
@@ -66,8 +66,8 @@ public final class Asteroid{
         
         if(collision && !Spaceship.getIsExploded()){
             ScoringPanel.yesCollision();//-50 health //+20 score
-            spaceship.setHealth(-50);
-            spaceship.setScore(20);
+            spaceship.addHealth(-50);
+            spaceship.addScore(20);
             setLocation();
         }
         if(yCord>panelHeight) {

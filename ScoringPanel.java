@@ -41,8 +41,8 @@ public class ScoringPanel extends JPanel{
             this.add(healthTF);
     
         }
-    
-    public static void addPoints(){
+
+    public static void addScore(){
         score+=asteroidCollisionPoints;
         scoreTF.setText(Integer.toString(score));
     }
