@@ -15,17 +15,20 @@ public class GamePanel extends JPanel implements Runnable{
 
    public static Asteroid[] asteroids;
    public static Spaceship spaceship;
+   public Ammo ammoPkg;
    private CopyOnWriteArrayList<LaserBeam> laserBeams;
 
    private boolean isRunning;
 
    private final Image backgroundImage;
    private Thread gameThread;
-   private Random random;
+   //private final Time gameTimer;
+   private final Random random;
 
    public GamePanel(){
 
       spaceship = null;
+      ammoPkg = null;
       asteroids = null;
       laserBeams = null;
 
@@ -39,6 +42,7 @@ public class GamePanel extends JPanel implements Runnable{
    public void createGameEntities(){
       spaceship = new Spaceship(this, 65, 75);
       asteroids = new Asteroid[NUM_ASTEROIDS];
+      ammoPkg = new Ammo(this, random.nextInt(this.getWidth()), 0);
 
       laserBeams = new CopyOnWriteArrayList<>();
 
@@ -77,9 +81,15 @@ public class GamePanel extends JPanel implements Runnable{
    }
    public void moveRenderLaser(){
       for(LaserBeam laserBeam: laserBeams){
-         laserBeam.draw();
-         laserBeam.move();
-         laserBeam.erase();
+         if(laserBeam!=null && laserBeam.canMove){
+            laserBeam.draw();
+            laserBeam.move();
+            laserBeam.erase();
+         }
+         else{
+            this.laserBeams.remove(laserBeam);
+            laserBeam = null;
+         }
       }
    }
    public void gameUpdate(){

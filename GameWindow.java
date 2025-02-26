@@ -34,6 +34,7 @@ public class GameWindow extends JFrame
 	private JPanel mainPanel;
 	private GamePanel gamePanel;
 	private ScoringPanel scorePanel;
+	private AmmoPanel ammoPanel;
 
 
 	@SuppressWarnings({"unchecked"})
@@ -42,7 +43,7 @@ public class GameWindow extends JFrame
 		spacePressed = false;
  
 		setTitle ("A Game with a Bat and an Alien");
-		setSize (650, 650);
+		setSize (750, 750);
 
 		// create user interface objects
 
@@ -97,6 +98,9 @@ public class GameWindow extends JFrame
 		scorePanel = new ScoringPanel();
 		scorePanel.setPreferredSize(new Dimension(150, 150));
 
+		ammoPanel = new AmmoPanel();
+		ammoPanel.setPreferredSize(new Dimension(150, 150));
+
 		// create infoPanel
 
 		JPanel infoPanel = new JPanel();
@@ -134,6 +138,7 @@ public class GameWindow extends JFrame
 		mainPanel.add(infoPanel);
 		mainPanel.add(gamePanel);
 		mainPanel.add(scorePanel);
+		mainPanel.add(ammoPanel);
 		mainPanel.add(buttonPanel);
 		mainPanel.setBackground(Color.PINK);
 

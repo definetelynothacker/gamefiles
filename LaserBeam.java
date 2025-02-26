@@ -16,7 +16,7 @@ public class LaserBeam{
     Rectangle2D.Double laserBeam;
 
     //flags
-    private boolean canMove;
+    public boolean canMove;
 
     private float dy;
     public static boolean isCollideWithAsteroid;
@@ -70,8 +70,6 @@ public class LaserBeam{
         
         if(canMove)
             yCord -= dy;
-        else
-            this.erase();
         if(isCollideWithAsteroid){
             GamePanel.spaceship.addScore(20);
             ScoringPanel.addScore();
@@ -82,7 +80,10 @@ public class LaserBeam{
         Rectangle2D.Double myRect = getBoundingRectangle();
         for(Asteroid asteroid: GamePanel.asteroids){
             Rectangle2D.Double asteroidRect = asteroid.getBoundingRectangle();
-            return myRect.intersects(asteroidRect);
+            if(myRect.intersects(asteroidRect)){
+                asteroid.setLocation();//after colliding with asteroid move to top;
+                return true;
+            }
         }
         return false;
     }

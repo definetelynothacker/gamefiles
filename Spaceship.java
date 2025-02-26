@@ -13,6 +13,7 @@ public class Spaceship{//player
 
     private int score;
     private int health;
+    public static int amtLasers=25;//amt Ammo
     
     private final int width;
     private final int height;
@@ -47,6 +48,7 @@ public class Spaceship{//player
 
         score = 0;
         health = 300;
+        amtLasers = 25;
 
         xCord = xPos;
         yCord = yPos;
