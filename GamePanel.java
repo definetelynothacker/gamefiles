@@ -15,7 +15,10 @@ public class GamePanel extends JPanel implements Runnable{
 
    public static Asteroid[] asteroids;
    public static Spaceship spaceship;
-   public Ammo ammoPkg;
+
+   public static Ammo ammoPkg;
+   public static Health healthPkg;
+
    private CopyOnWriteArrayList<LaserBeam> laserBeams;
 
    private boolean isRunning;
@@ -28,8 +31,11 @@ public class GamePanel extends JPanel implements Runnable{
    public GamePanel(){
 
       spaceship = null;
-      ammoPkg = null;
       asteroids = null;
+
+      healthPkg = null;
+      ammoPkg = null;
+
       laserBeams = null;
 
       isRunning = false;
@@ -40,14 +46,17 @@ public class GamePanel extends JPanel implements Runnable{
    }
 
    public void createGameEntities(){
+      int panelWidth = this.getWidth();
+
       spaceship = new Spaceship(this, 65, 75);
       asteroids = new Asteroid[NUM_ASTEROIDS];
-      ammoPkg = new Ammo(this, random.nextInt(this.getWidth()), 0);
+      ammoPkg = new Ammo(this, random.nextInt(panelWidth), 10, spaceship);
+      healthPkg = new Health(this, random.nextInt(panelWidth), 10, spaceship);
 
       laserBeams = new CopyOnWriteArrayList<>();
 
       for(int i = 0; i<NUM_ASTEROIDS; i++){
-         asteroids[i] = new Asteroid(this, random.nextInt(this.getWidth()), 10, spaceship);
+         asteroids[i] = new Asteroid(this, random.nextInt(panelWidth), 10, spaceship);
       }
    }
 
@@ -75,6 +84,10 @@ public class GamePanel extends JPanel implements Runnable{
       gameThread = new Thread(this);
       gameThread.start();
    }
+   public void playAgain(){
+      //if()
+      ScoringPanel.decreaseLivesTF();
+   }
    public void createLaser(){
       LaserBeam newLaserBeam = new LaserBeam(this, spaceship.getXCord()+7, spaceship.getYCord()+25);
       laserBeams.add(newLaserBeam);
@@ -93,6 +106,8 @@ public class GamePanel extends JPanel implements Runnable{
       }
    }
    public void gameUpdate(){
+      ammoPkg.move();
+      healthPkg.move();
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i].move();
       }
@@ -104,6 +119,12 @@ public class GamePanel extends JPanel implements Runnable{
 
       if(spaceship != null)
          spaceship.draw();
+
+      if(ammoPkg != null)
+         ammoPkg.draw();
+
+      if(healthPkg != null)
+         healthPkg.draw();
 
       if(asteroids != null){
          for(int i = 0; i<NUM_ASTEROIDS; i++)
@@ -141,8 +162,10 @@ public class GamePanel extends JPanel implements Runnable{
             gameUpdate();
             gameRender();
             moveRenderLaser();
-            if(GameWindow.spacePressed && spaceship.canShoot()){
+
+            if(GameWindow.spacePressed && Spaceship.amtLasers>0 && spaceship.canShoot()){
                createLaser();
+               AmmoPanel.decreaseAmmo();
                GameWindow.spacePressed = false;
             }
             Thread.sleep(50);

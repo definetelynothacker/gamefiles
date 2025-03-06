@@ -7,25 +7,29 @@ import javax.swing.JPanel;
 
 public class Spaceship{//player
 
-    private JPanel panel;
+    private final JPanel panel;
     private int xCord;
     private int yCord;
 
-    private int score;
-    private int health;
+    public static int score=0;
+    public static int health=300;
+    public static int lives_rem=3;
     public static int amtLasers=25;//amt Ammo
+
+    public boolean hasEnoughLasers;
     
     private final int width;
     private final int height;
 
     private Rectangle2D.Double spaceship;
-    private Image defaultImage, explosionImage, graveImage;
+    private final Image defaultImage, explosionImage, graveImage;
 
     //flags
     private static boolean isExploded;
     private boolean is3SecondsElapsed;
     private boolean gotTime;
     private boolean canShoot;
+    private boolean isDead, playAgainBtnPushed;
 
     private long explosionStartTime;
     private long currentTime;
@@ -46,10 +50,6 @@ public class Spaceship{//player
         explosionImage = ImageManager.loadImage("explode.png");
         graveImage = ImageManager.loadImage("grave.png");
 
-        score = 0;
-        health = 300;
-        amtLasers = 25;
-
         xCord = xPos;
         yCord = yPos;
 
@@ -59,15 +59,20 @@ public class Spaceship{//player
         dx = 25;//speed
         dy = 25;//speed
 
-        isExploded = is3SecondsElapsed = gotTime = false;
-        canShoot = true;
+        isExploded = is3SecondsElapsed = gotTime = isDead = playAgainBtnPushed = false;
+        canShoot = hasEnoughLasers = true;
     }
     public void draw(){
         Graphics g = panel.getGraphics();
         Graphics2D g2 = (Graphics2D) g;
-        if(health>0)//if not dead draw spaceship
+        if(health>0){//if not dead draw spaceship
             g2.drawImage(defaultImage, xCord, yCord, width, height, null);
-        else if(!is3SecondsElapsed){//if dead and time has not crossed 3 seconds draw explosion
+        }
+        else if(!is3SecondsElapsed && !playAgainBtnPushed){//if dead and time has not crossed 3 seconds draw explosion
+            if(playAgainBtnPushed){
+                isDead = true;
+                playAgainBtnPushed = false;
+            }
             g2.drawImage(explosionImage, xCord, yCord, width, height, null);
             isExploded = true;
             canShoot = false;//should only run once to save memory
@@ -80,8 +85,9 @@ public class Spaceship{//player
             if(timeElapsed>3000)
                 is3SecondsElapsed = true;
         }
-        else if(is3SecondsElapsed)//after 3 seconds passed draw grave image
+        else if(is3SecondsElapsed){//after 3 seconds passed draw grave image
             g2.drawImage(graveImage, xCord, yCord, width*2, height*2, null);
+        }
         g.dispose();
     }
     public void erase(){
@@ -149,10 +155,10 @@ public class Spaceship{//player
     }
 
     public int getScore(){return this.score;}
-    public int getHealth(){return this.health;}
+    public int getHealth(){return Spaceship.health;}
 
-    public void addHealth(int health){
-        this.health+=health;
+    public static void addHealth(int health){
+        Spaceship.health+=health;
     }
     public void setIs3SecondsElapsed(boolean is3SecondsElapsed){
         this.is3SecondsElapsed = is3SecondsElapsed;
@@ -175,5 +181,11 @@ public class Spaceship{//player
     }
     public boolean canShoot(){
         return this.canShoot;
+    }
+    public boolean hasEnoughLasers(){
+        return this.hasEnoughLasers;
+    }
+    public void hasEnoughLasers(boolean hasEnough){
+        this.hasEnoughLasers = hasEnough;
     }
 }

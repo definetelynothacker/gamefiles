@@ -13,14 +13,13 @@ public final class Asteroid{
 
     public int width;
     public int height;
-    private int topY;
 
     private int dy;
-    private int dx;
+    private final int dx;
 
     private final Random random;
 
-    private JPanel panel;
+    private final JPanel panel;
 
     private final Image asteroidImage;
     
@@ -65,15 +64,15 @@ public final class Asteroid{
         boolean collision = collidesWithSpaceship();
         
         if(collision && !Spaceship.getIsExploded()){
-            ScoringPanel.yesCollision();//-50 health //+20 score
-            spaceship.addHealth(-50);
-            spaceship.addScore(20);
+            ScoringPanel.yesAsteroidCollision();
             setLocation();
         }
         if(yCord>panelHeight) {
             setLocation();
             dy = dy + 1;
         }
+        if(dy>30)
+            dy/=2;
     }
     public boolean isOnAsteroid(int xCord, int yCord){
         if(asteroidImage == null)

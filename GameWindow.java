@@ -18,23 +18,24 @@ public class GameWindow extends JFrame
 
 	// declare text fields
 
-	private JTextField statusBarTF;
-	private JTextField keyTF;
-	private JTextField mouseTF;
+	private final JTextField statusBarTF;
+	private final JTextField keyTF;
+	private final JTextField mouseTF;
 
 	// declare buttons
 
-	private JButton startB;
-	private JButton dropAsteroid;
-	private JButton focusB;
-	private JButton exitB;
+	private final JButton startB;
+	private final JButton dropAsteroid;
+	private final JButton playAgain;//"play again"
+	private final JButton focusB;
+	private final JButton exitB;
 
 	private Container c;
 
-	private JPanel mainPanel;
-	private GamePanel gamePanel;
-	private ScoringPanel scorePanel;
-	private AmmoPanel ammoPanel;
+	private final JPanel mainPanel;
+	private final GamePanel gamePanel;
+	private final ScoringPanel scorePanel;
+	private final AmmoPanel ammoPanel;
 
 
 	@SuppressWarnings({"unchecked"})
@@ -71,6 +72,7 @@ public class GameWindow extends JFrame
 
 		startB = new JButton ("Show Spaceship");
 	    dropAsteroid = new JButton ("Drop Asteroids");
+		playAgain = new JButton("Play Again");
 	    focusB = new JButton ("Focus on Key");
 		exitB = new JButton ("Exit");
 
@@ -78,6 +80,7 @@ public class GameWindow extends JFrame
 
 		startB.addActionListener(this);
 		dropAsteroid.addActionListener(this);
+		playAgain.addActionListener(this);
 		focusB.addActionListener(this);
 		exitB.addActionListener(this);
 
@@ -130,6 +133,7 @@ public class GameWindow extends JFrame
 
 		buttonPanel.add(startB);
 		buttonPanel.add(dropAsteroid);
+		buttonPanel.add(playAgain);
 		buttonPanel.add(focusB);
 		buttonPanel.add(exitB);
 
@@ -168,7 +172,7 @@ public class GameWindow extends JFrame
 
 	// implement single method in ActionListener interface
 
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e){
 
 		String command = e.getActionCommand();
 		
@@ -182,6 +186,9 @@ public class GameWindow extends JFrame
 
 		if (command.equals(dropAsteroid.getText())){
 			gamePanel.dropAsteroid();
+		}
+		if(command.equals(playAgain.getText())){
+			gamePanel.playAgain();
 		}
 		if (command.equals(exitB.getText()))
 			System.exit(0);

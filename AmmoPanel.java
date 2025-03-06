@@ -3,7 +3,7 @@ import javax.swing.*;
 
 public class AmmoPanel extends JPanel{
 
-    private static final int AMT_AMMO_PCKG=35;//35 shots
+    private static final int AMT_AMMO_PCKG=10;//10 shots
 
     private static JLabel amtAmmoL;
     private static JTextField amtAmmoTF; 

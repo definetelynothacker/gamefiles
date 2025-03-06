@@ -71,8 +71,7 @@ public class LaserBeam{
         if(canMove)
             yCord -= dy;
         if(isCollideWithAsteroid){
-            GamePanel.spaceship.addScore(20);
-            ScoringPanel.addScore();
+            ScoringPanel.laserCollisionScore();
             canMove = false;
         }
     }
