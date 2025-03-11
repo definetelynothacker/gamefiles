@@ -17,14 +17,16 @@ public class LaserBeam{
 
     //flags
     public boolean canMove;
+    boolean canDestroyAsteroid;
 
     private float dy;
     public static boolean isCollideWithAsteroid;
     //private float accumulatedMove;
 
-    private Color bgColor;
+    private final Color bgColor;
+    private Color laserColor;
 
-    public LaserBeam(JPanel p, int xPos, int yPos){
+    public LaserBeam(JPanel p, int xPos, int yPos, boolean canDestroyAsteroid, Color laserColor){
         panel = p;
         bgColor = panel.getBackground();
 
@@ -38,6 +40,8 @@ public class LaserBeam{
 
         isCollideWithAsteroid = false;
         canMove = true;
+        this.canDestroyAsteroid=canDestroyAsteroid;
+        this.laserColor = laserColor;
         //accumulatedMove = 0.0f;
     }
 
@@ -48,7 +52,7 @@ public class LaserBeam{
         Graphics2D g2 = (Graphics2D) g;
 
         laserBeam = new Rectangle2D.Double(xCord, yCord, width, height);
-        g2.setColor(Color.BLUE);
+        g2.setColor(laserColor);
         g2.fill(laserBeam);
 
         g.dispose();
@@ -63,19 +67,33 @@ public class LaserBeam{
         g2.fill(new Rectangle2D.Double(xCord, yCord, width, height));
         g.dispose();
     }
-    public void move(){
+    public void move(int direction){
         if (!panel.isVisible()) return;
 
         isCollideWithAsteroid = collidesWithAsteroid();
         
-        if(canMove)
-            yCord -= dy;
+        if(canMove && direction==1)
+            yCord-=dy;
+        else if(canMove && direction==2)
+            yCord+=dy;
+
         if(isCollideWithAsteroid){
             ScoringPanel.laserCollisionScore();
             canMove = false;
         }
     }
     public boolean collidesWithAsteroid(){
+        Rectangle2D.Double myRect = getBoundingRectangle();
+        for(Asteroid asteroid: GamePanel.asteroids){
+            Rectangle2D.Double asteroidRect = asteroid.getBoundingRectangle();
+            if(myRect.intersects(asteroidRect) && canDestroyAsteroid){
+                asteroid.setLocation();//after colliding with asteroid move to top;
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean collidesWithUFO(){
         Rectangle2D.Double myRect = getBoundingRectangle();
         for(Asteroid asteroid: GamePanel.asteroids){
             Rectangle2D.Double asteroidRect = asteroid.getBoundingRectangle();

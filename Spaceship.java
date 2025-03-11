@@ -26,10 +26,9 @@ public class Spaceship{//player
 
     //flags
     private static boolean isExploded;
-    private boolean is3SecondsElapsed;
-    private boolean gotTime;
-    private boolean canShoot;
-    private boolean isDead, playAgainBtnPushed;
+    private static boolean is3SecondsElapsed;
+    private static boolean gotTime;
+    private static boolean canShoot;
 
     private long explosionStartTime;
     private long currentTime;
@@ -59,7 +58,7 @@ public class Spaceship{//player
         dx = 25;//speed
         dy = 25;//speed
 
-        isExploded = is3SecondsElapsed = gotTime = isDead = playAgainBtnPushed = false;
+        isExploded = is3SecondsElapsed = gotTime = false;
         canShoot = hasEnoughLasers = true;
     }
     public void draw(){
@@ -68,11 +67,7 @@ public class Spaceship{//player
         if(health>0){//if not dead draw spaceship
             g2.drawImage(defaultImage, xCord, yCord, width, height, null);
         }
-        else if(!is3SecondsElapsed && !playAgainBtnPushed){//if dead and time has not crossed 3 seconds draw explosion
-            if(playAgainBtnPushed){
-                isDead = true;
-                playAgainBtnPushed = false;
-            }
+        else if(!is3SecondsElapsed){//if dead and time has not crossed 3 seconds draw explosion
             g2.drawImage(explosionImage, xCord, yCord, width, height, null);
             isExploded = true;
             canShoot = false;//should only run once to save memory
@@ -151,24 +146,24 @@ public class Spaceship{//player
         return height;
     }
     public void addScore(int score){
-        this.score+=score;
+        Spaceship.score+=score;
     }
 
-    public int getScore(){return this.score;}
+    public int getScore(){return Spaceship.score;}
     public int getHealth(){return Spaceship.health;}
 
     public static void addHealth(int health){
         Spaceship.health+=health;
     }
     public void setIs3SecondsElapsed(boolean is3SecondsElapsed){
-        this.is3SecondsElapsed = is3SecondsElapsed;
+        Spaceship.is3SecondsElapsed = is3SecondsElapsed;
     }
     public void setIsExploded(boolean isExploded){
         Spaceship.isExploded = isExploded;
     }
 
     public static boolean getIsExploded(){return Spaceship.isExploded;}
-    public boolean getIs3SecondsElapsed(){return this.is3SecondsElapsed;}
+    public boolean getIs3SecondsElapsed(){return Spaceship.is3SecondsElapsed;}
 
     public long getExplosionStartTime(){
         return explosionStartTime;
@@ -180,12 +175,24 @@ public class Spaceship{//player
         return this.timeElapsed;
     }
     public boolean canShoot(){
-        return this.canShoot;
+        return Spaceship.canShoot;
     }
     public boolean hasEnoughLasers(){
         return this.hasEnoughLasers;
     }
     public void hasEnoughLasers(boolean hasEnough){
         this.hasEnoughLasers = hasEnough;
+    }
+    public static void playAgain(){
+        Spaceship.health = 300;
+        Spaceship.score = 0;
+        Spaceship.amtLasers = 25;
+        Spaceship.lives_rem -= 1;
+        
+        //flags
+        Spaceship.isExploded = false;
+        Spaceship.canShoot = true;
+        Spaceship.gotTime = false;
+        Spaceship.is3SecondsElapsed = false;
     }
 }

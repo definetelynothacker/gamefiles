@@ -71,7 +71,7 @@ public final class Asteroid{
             setLocation();
             dy = dy + 1;
         }
-        if(dy>30)
+        if(dy>20)
             dy/=2;
     }
     public boolean isOnAsteroid(int xCord, int yCord){

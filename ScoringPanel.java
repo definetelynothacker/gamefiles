@@ -15,7 +15,6 @@ public class ScoringPanel extends JPanel{
     public static int asteroidCollisionHealthDecrease = 20;
     public static int laserShotAsteroidScore = 20;
     public static int HEALTH_POINTS = 10;
-    private static int LIVES_REM = 3;
 
         public ScoringPanel(){
     
@@ -37,7 +36,7 @@ public class ScoringPanel extends JPanel{
             livesRemTF.setEditable(false);
             livesRemTF.setBackground(Color.CYAN);
     
-            GridLayout gridLayout = new GridLayout(2, 2);
+            GridLayout gridLayout = new GridLayout(3, 2);
             this.setLayout(gridLayout);
     
             this.add(scoreL);
@@ -59,14 +58,16 @@ public class ScoringPanel extends JPanel{
     public static void yesAsteroidCollision(){
         if(!Spaceship.getIsExploded()){
             Spaceship.score+=asteroidCollisionPoints;
-            scoreTF.setText(Integer.toString(Spaceship.health));
+            scoreTF.setText(Integer.toString(Spaceship.score));
 
             Spaceship.health-=asteroidCollisionHealthDecrease;
             healthTF.setText(Integer.toString(Spaceship.health));
         }
     }
-    public static void decreaseLivesTF(){
-        Spaceship.lives_rem-=1;
+    public static void playAgain(){
+        Spaceship.playAgain();//reset flags and values to initial
+        scoreTF.setText(Integer.toString(Spaceship.score));
+        healthTF.setText(Integer.toString(Spaceship.health));
         livesRemTF.setText(Integer.toString(Spaceship.lives_rem));
     }
 }

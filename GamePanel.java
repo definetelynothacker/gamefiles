@@ -1,9 +1,17 @@
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JWindow;
+import javax.swing.SwingConstants;
 
 /**
  * A component that displays all the game entities
@@ -15,11 +23,13 @@ public class GamePanel extends JPanel implements Runnable{
 
    public static Asteroid[] asteroids;
    public static Spaceship spaceship;
+   public UFO ufo;
 
    public static Ammo ammoPkg;
    public static Health healthPkg;
 
    private CopyOnWriteArrayList<LaserBeam> laserBeams;
+   private CopyOnWriteArrayList<LaserBeam> laserBeamsUFO;
 
    private boolean isRunning;
 
@@ -31,6 +41,7 @@ public class GamePanel extends JPanel implements Runnable{
    public GamePanel(){
 
       spaceship = null;
+      ufo = null;
       asteroids = null;
 
       healthPkg = null;
@@ -49,11 +60,13 @@ public class GamePanel extends JPanel implements Runnable{
       int panelWidth = this.getWidth();
 
       spaceship = new Spaceship(this, 65, 75);
+      ufo = new UFO(this, 150, 0);
       asteroids = new Asteroid[NUM_ASTEROIDS];
       ammoPkg = new Ammo(this, random.nextInt(panelWidth), 10, spaceship);
       healthPkg = new Health(this, random.nextInt(panelWidth), 10, spaceship);
 
       laserBeams = new CopyOnWriteArrayList<>();
+      laserBeamsUFO = new CopyOnWriteArrayList<>();
 
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i] = new Asteroid(this, random.nextInt(panelWidth), 10, spaceship);
@@ -85,22 +98,57 @@ public class GamePanel extends JPanel implements Runnable{
       gameThread.start();
    }
    public void playAgain(){
-      //if()
-      ScoringPanel.decreaseLivesTF();
+      if(Spaceship.lives_rem>0 && Spaceship.health<=0)
+         ScoringPanel.playAgain();
+      else{
+         JWindow popup = new JWindow();
+         popup.setLayout(new BorderLayout());
+
+         JLabel messageLabel = new JLabel("Health > 0 or No lives remaining", SwingConstants.CENTER);
+         messageLabel.setFont(new Font("Arial", Font.BOLD, 14));
+         popup.add(messageLabel, BorderLayout.CENTER);
+
+         popup.setSize(300, 100);
+         popup.setLocationRelativeTo(null);
+
+         popup.setVisible(true);
+
+         new Timer().schedule(new TimerTask() {
+               @Override
+               public void run() {
+                  popup.dispose();
+               }
+         }, 3000);
+      }
    }
    public void createLaser(){
-      LaserBeam newLaserBeam = new LaserBeam(this, spaceship.getXCord()+7, spaceship.getYCord()+25);
+      LaserBeam newLaserBeam = new LaserBeam(this, spaceship.getXCord()+7, spaceship.getYCord()+25, true, Color.BLUE);
       laserBeams.add(newLaserBeam);
    }
    public void moveRenderLaser(){
       for(LaserBeam laserBeam: laserBeams){
          if(laserBeam!=null && laserBeam.canMove){
             laserBeam.draw();
-            laserBeam.move();
+            laserBeam.move(1);
             laserBeam.erase();
          }
-         else{
+         else if(laserBeam!=null && laserBeam.getYCord()<0){
             this.laserBeams.remove(laserBeam);
+            laserBeam = null;
+         }
+      }
+   }
+   public void shootUFOLaser(){
+      LaserBeam newLaserBeam = new LaserBeam(this, ufo.getXCord()+7, ufo.getYCord()+ufo.getHeight()+25, false, Color.RED);
+      laserBeamsUFO.add(newLaserBeam);
+      for(LaserBeam laserBeam: laserBeamsUFO){
+         if(laserBeam!=null && laserBeam.canMove){
+            laserBeam.draw();
+            laserBeam.move(2);
+            laserBeam.erase();
+         }
+         else if(laserBeam!=null && laserBeam.getYCord()>this.getWidth()){
+            this.laserBeamsUFO.remove(laserBeam);
             laserBeam = null;
          }
       }
@@ -108,6 +156,7 @@ public class GamePanel extends JPanel implements Runnable{
    public void gameUpdate(){
       ammoPkg.move();
       healthPkg.move();
+      ufo.move();
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i].move();
       }
@@ -125,6 +174,9 @@ public class GamePanel extends JPanel implements Runnable{
 
       if(healthPkg != null)
          healthPkg.draw();
+
+      if(ufo != null)
+         ufo.draw();
 
       if(asteroids != null){
          for(int i = 0; i<NUM_ASTEROIDS; i++)
@@ -162,6 +214,7 @@ public class GamePanel extends JPanel implements Runnable{
             gameUpdate();
             gameRender();
             moveRenderLaser();
+         
 
             if(GameWindow.spacePressed && Spaceship.amtLasers>0 && spaceship.canShoot()){
                createLaser();
