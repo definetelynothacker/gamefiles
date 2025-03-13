@@ -77,6 +77,11 @@ public class LaserBeam{
         else if(canMove && direction==2)
             yCord+=dy;
 
+        if(collidesWithSpaceship() && !canDestroyAsteroid){//if shot by spaceship, cannot do damage to spaceship
+            ScoringPanel.spaceshipHitByLaser();
+            GamePanel.removeUFOLaser(this);
+        }
+
         if(isCollideWithAsteroid){
             ScoringPanel.laserCollisionScore();
             canMove = false;
@@ -93,15 +98,11 @@ public class LaserBeam{
         }
         return false;
     }
-    public boolean collidesWithUFO(){
+    public boolean collidesWithSpaceship(){
         Rectangle2D.Double myRect = getBoundingRectangle();
-        for(Asteroid asteroid: GamePanel.asteroids){
-            Rectangle2D.Double asteroidRect = asteroid.getBoundingRectangle();
-            if(myRect.intersects(asteroidRect)){
-                asteroid.setLocation();//after colliding with asteroid move to top;
-                return true;
-            }
-        }
+        Rectangle2D.Double spaceshipRect = GamePanel.spaceship.getBoundingRectangle();
+        if(myRect.intersects(spaceshipRect))
+            return true;
         return false;
     }
     public Rectangle2D.Double getBoundingRectangle(){

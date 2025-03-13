@@ -23,19 +23,19 @@ public class GamePanel extends JPanel implements Runnable{
 
    public static Asteroid[] asteroids;
    public static Spaceship spaceship;
-   public UFO ufo;
+   public static UFO ufo;
 
    public static Ammo ammoPkg;
    public static Health healthPkg;
 
-   private CopyOnWriteArrayList<LaserBeam> laserBeams;
-   private CopyOnWriteArrayList<LaserBeam> laserBeamsUFO;
+   private static CopyOnWriteArrayList<LaserBeam> laserBeams;
+   private static CopyOnWriteArrayList<LaserBeam> laserBeamsUFO;
 
    private boolean isRunning;
 
    private final Image backgroundImage;
    private Thread gameThread;
-   //private final Time gameTimer;
+   private long lastTime, currentTime;
    private final Random random;
 
    public GamePanel(){
@@ -52,6 +52,7 @@ public class GamePanel extends JPanel implements Runnable{
       isRunning = false;
 
       random = new Random();
+      lastTime = System.currentTimeMillis();
 
       backgroundImage = ImageManager.loadImage("bg2.jpg");
    }
@@ -133,14 +134,16 @@ public class GamePanel extends JPanel implements Runnable{
             laserBeam.erase();
          }
          else if(laserBeam!=null && laserBeam.getYCord()<0){
-            this.laserBeams.remove(laserBeam);
+            laserBeams.remove(laserBeam);
             laserBeam = null;
          }
       }
    }
    public void shootUFOLaser(){
-      LaserBeam newLaserBeam = new LaserBeam(this, ufo.getXCord()+7, ufo.getYCord()+ufo.getHeight()+25, false, Color.RED);
+      LaserBeam newLaserBeam = new LaserBeam(this, ufo.getXCord()+7, ufo.getYCord()+ufo.getHeight(), false, Color.RED);
       laserBeamsUFO.add(newLaserBeam);
+   }
+   public void renderUFOLaser(){
       for(LaserBeam laserBeam: laserBeamsUFO){
          if(laserBeam!=null && laserBeam.canMove){
             laserBeam.draw();
@@ -148,7 +151,7 @@ public class GamePanel extends JPanel implements Runnable{
             laserBeam.erase();
          }
          else if(laserBeam!=null && laserBeam.getYCord()>this.getWidth()){
-            this.laserBeamsUFO.remove(laserBeam);
+            laserBeamsUFO.remove(laserBeam);
             laserBeam = null;
          }
       }
@@ -203,6 +206,9 @@ public class GamePanel extends JPanel implements Runnable{
    public boolean isOnSpaceShip(int x, int y){
       return spaceship.isOnSpaceShip(x, y);
    }
+   public static void removeUFOLaser(LaserBeam laserBeam){
+      laserBeamsUFO.remove(laserBeam);
+   }
    //
    //
 
@@ -214,7 +220,13 @@ public class GamePanel extends JPanel implements Runnable{
             gameUpdate();
             gameRender();
             moveRenderLaser();
-         
+            renderUFOLaser();
+            currentTime = System.currentTimeMillis();
+
+            if(currentTime - lastTime > 1500){
+               shootUFOLaser();
+               lastTime = currentTime;
+            }
 
             if(GameWindow.spacePressed && Spaceship.amtLasers>0 && spaceship.canShoot()){
                createLaser();

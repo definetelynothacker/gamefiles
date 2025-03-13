@@ -57,10 +57,19 @@ public class ScoringPanel extends JPanel{
     }
     public static void yesAsteroidCollision(){
         if(!Spaceship.getIsExploded()){
-            Spaceship.score+=asteroidCollisionPoints;
+            Spaceship.score+=asteroidCollisionPoints;//5
             scoreTF.setText(Integer.toString(Spaceship.score));
 
-            Spaceship.health-=asteroidCollisionHealthDecrease;
+            Spaceship.health-=asteroidCollisionHealthDecrease;//-20
+            healthTF.setText(Integer.toString(Spaceship.health));
+        }
+    }
+    public static void spaceshipHitByLaser(){
+        if(!Spaceship.getIsExploded()){
+            Spaceship.score-=asteroidCollisionPoints;//-5
+            scoreTF.setText(Integer.toString(Spaceship.score));
+
+            Spaceship.health-=laserShotAsteroidScore;//-20
             healthTF.setText(Integer.toString(Spaceship.health));
         }
     }
