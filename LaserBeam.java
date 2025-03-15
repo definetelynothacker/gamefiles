@@ -18,6 +18,7 @@ public class LaserBeam{
     //flags
     public boolean canMove;
     boolean canDestroyAsteroid;
+    boolean isUfoLaser;
 
     private float dy;
     public static boolean isCollideWithAsteroid;
@@ -26,7 +27,7 @@ public class LaserBeam{
     private final Color bgColor;
     private Color laserColor;
 
-    public LaserBeam(JPanel p, int xPos, int yPos, boolean canDestroyAsteroid, Color laserColor){
+    public LaserBeam(JPanel p, int xPos, int yPos, boolean canDestroyAsteroid, Color laserColor, boolean isUfoLaser){
         panel = p;
         bgColor = panel.getBackground();
 
@@ -41,6 +42,7 @@ public class LaserBeam{
         isCollideWithAsteroid = false;
         canMove = true;
         this.canDestroyAsteroid=canDestroyAsteroid;
+        this.isUfoLaser = isUfoLaser;
         this.laserColor = laserColor;
         //accumulatedMove = 0.0f;
     }
@@ -52,6 +54,7 @@ public class LaserBeam{
         Graphics2D g2 = (Graphics2D) g;
 
         laserBeam = new Rectangle2D.Double(xCord, yCord, width, height);
+        
         g2.setColor(laserColor);
         g2.fill(laserBeam);
 
@@ -86,6 +89,11 @@ public class LaserBeam{
             ScoringPanel.laserCollisionScore();
             canMove = false;
         }
+
+        if(collidesWithUFO()){
+            GamePanel.ufo.gotShootBySpaceshipLaser();
+            GamePanel.removeSpaceshipLaser(this);
+        }
     }
     public boolean collidesWithAsteroid(){
         Rectangle2D.Double myRect = getBoundingRectangle();
@@ -101,9 +109,12 @@ public class LaserBeam{
     public boolean collidesWithSpaceship(){
         Rectangle2D.Double myRect = getBoundingRectangle();
         Rectangle2D.Double spaceshipRect = GamePanel.spaceship.getBoundingRectangle();
-        if(myRect.intersects(spaceshipRect))
-            return true;
-        return false;
+        return myRect.intersects(spaceshipRect);
+    }
+    public boolean collidesWithUFO(){
+        Rectangle2D.Double myRect = getBoundingRectangle();
+        Rectangle2D.Double ufoRect = GamePanel.ufo.getBoundingRectangle();
+        return myRect.intersects(ufoRect) && !isUfoLaser;
     }
     public Rectangle2D.Double getBoundingRectangle(){
         return new Rectangle2D.Double (xCord, yCord, width, height);

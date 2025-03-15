@@ -35,7 +35,7 @@ public class GamePanel extends JPanel implements Runnable{
 
    private final Image backgroundImage;
    private Thread gameThread;
-   private long lastTime, currentTime;
+   private long lastTime, lastTimeExploded=0, currentTime;
    private final Random random;
 
    public GamePanel(){
@@ -123,7 +123,7 @@ public class GamePanel extends JPanel implements Runnable{
       }
    }
    public void createLaser(){
-      LaserBeam newLaserBeam = new LaserBeam(this, spaceship.getXCord()+7, spaceship.getYCord()+25, true, Color.BLUE);
+      LaserBeam newLaserBeam = new LaserBeam(this, spaceship.getXCord()+7, spaceship.getYCord()+25, true, Color.BLUE, false);
       laserBeams.add(newLaserBeam);
    }
    public void moveRenderLaser(){
@@ -140,12 +140,12 @@ public class GamePanel extends JPanel implements Runnable{
       }
    }
    public void shootUFOLaser(){
-      LaserBeam newLaserBeam = new LaserBeam(this, ufo.getXCord()+7, ufo.getYCord()+ufo.getHeight(), false, Color.RED);
+      LaserBeam newLaserBeam = new LaserBeam(this, ufo.getXCord()+7, ufo.getYCord()+ufo.getHeight(), false, Color.RED, true);
       laserBeamsUFO.add(newLaserBeam);
    }
    public void renderUFOLaser(){
       for(LaserBeam laserBeam: laserBeamsUFO){
-         if(laserBeam!=null && laserBeam.canMove){
+         if(laserBeam!=null && laserBeam.canMove && !UFO.getIsExploded()){
             laserBeam.draw();
             laserBeam.move(2);
             laserBeam.erase();
@@ -159,7 +159,7 @@ public class GamePanel extends JPanel implements Runnable{
    public void gameUpdate(){
       ammoPkg.move();
       healthPkg.move();
-      ufo.move();
+      //ufo.move();
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i].move();
       }
@@ -209,6 +209,9 @@ public class GamePanel extends JPanel implements Runnable{
    public static void removeUFOLaser(LaserBeam laserBeam){
       laserBeamsUFO.remove(laserBeam);
    }
+   public static void removeSpaceshipLaser(LaserBeam laserBeam){
+      laserBeams.remove(laserBeam);
+   }
    //
    //
 
@@ -223,10 +226,20 @@ public class GamePanel extends JPanel implements Runnable{
             renderUFOLaser();
             currentTime = System.currentTimeMillis();
 
-            if(currentTime - lastTime > 1500){
+            if(currentTime - lastTime > 1500 && !UFO.getIsExploded()){//only shoots if not exploded
                shootUFOLaser();
                lastTime = currentTime;
             }
+            if(UFO.getIsExploded()){
+               if (lastTimeExploded == 0) {
+                   lastTimeExploded = System.currentTimeMillis();
+               }
+               if(currentTime - lastTimeExploded > 15000){
+                   UFO.resetUFO();
+                   lastTimeExploded = 0;
+               }
+           }
+           
 
             if(GameWindow.spacePressed && Spaceship.amtLasers>0 && spaceship.canShoot()){
                createLaser();

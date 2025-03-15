@@ -14,7 +14,7 @@ public class ScoringPanel extends JPanel{
     public static int asteroidCollisionPoints = 5;
     public static int asteroidCollisionHealthDecrease = 20;
     public static int laserShotAsteroidScore = 20;
-    public static int HEALTH_POINTS = 10;
+    public static int HEALTH_POINTS = 20;
 
         public ScoringPanel(){
     
