@@ -159,7 +159,7 @@ public class GamePanel extends JPanel implements Runnable{
    public void gameUpdate(){
       ammoPkg.move();
       healthPkg.move();
-      //ufo.move();
+      ufo.move();
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i].move();
       }

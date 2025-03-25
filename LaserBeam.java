@@ -37,7 +37,7 @@ public class LaserBeam{
         width = 10;
         height = 20;
         
-        dy = 5;
+        dy = 15;
 
         isCollideWithAsteroid = false;
         canMove = true;
