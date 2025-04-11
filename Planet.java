@@ -5,73 +5,45 @@ import java.awt.geom.Rectangle2D;
 import java.util.Random;
 import javax.swing.JPanel;
 
-public final class Asteroid{
+public final class Planet{
 
-    private final Spaceship spaceship;
     public int xCord;
     public int yCord;
 
     public int width;
     public int height;
 
-    private int dy;
-    private final int dx;
-
-    private final Random random;
-
     private final JPanel panel;
 
-    private final Image asteroidImage;
+    private Image[] images;
+    private final Image chooseImage;
+    Spaceship spaceship;
     
-    public Asteroid(JPanel panel, int xCord, int yCord, Spaceship spaceship){
-        
-        this.spaceship = spaceship;
+    public Planet(JPanel panel, int xCord, int yCord, Spaceship spaceship){
         this.xCord = xCord;
         this.yCord = yCord;
         this.panel = panel;
-
-        random = new Random();
+        this.spaceship = spaceship;
 
         width = 36;
         height = 36;
 
-        setLocation(); 
-
-        dy = 3;
-        dx = 0;
-
-        asteroidImage = ImageManager.loadImage("asteroid.png");
+        images[0] = ImageManager.loadImage("/planetImages/earth.png");
+        images[1] = ImageManager.loadImage("/planetImages/mars.png");
+        images[2] = ImageManager.loadImage("/planetImages/saturn_b.png");
+        images[3] = ImageManager.loadImage("/planetImages/saturn_y.png");
+        Random random = new Random();
+        chooseImage = images[random.nextInt(4)];
     }
-    public void setLocation(){
-        int panelWidth = panel.getWidth();
-        xCord = random.nextInt(panelWidth - width);
-        yCord = 10;
-    }
-    public void draw(Graphics2D g2){
-        g2.drawImage(asteroidImage, xCord, yCord, width, height, null);
-    }
-    public void move(){
-        if(!panel.isVisible ())return;
+    public void draw(){
+        Graphics g = panel.getGraphics();
+        Graphics2D g2 = (Graphics2D) g;
 
-        xCord = xCord + dx;
-        yCord = yCord + dy;
-
-        int panelHeight = panel.getHeight();
-        boolean collision = collidesWithSpaceship();
-        
-        if(collision && !Spaceship.getIsExploded()){
-            ScoringPanel.yesAsteroidCollision();
-            setLocation();
-        }
-        if(yCord>panelHeight) {
-            setLocation();
-            dy = dy + 1;
-        }
-        if(dy>20)
-            dy/=2;
+        g2.drawImage(chooseImage, xCord, yCord, width, height, null);
+        g.dispose();
     }
     public boolean isOnAsteroid(int xCord, int yCord){
-        if(asteroidImage == null)
+        if(chooseImage == null)
             return false;
         
         Rectangle2D.Double myRect = getBoundingRectangle();

@@ -47,18 +47,12 @@ public class LaserBeam{
         //accumulatedMove = 0.0f;
     }
 
-    public void draw(){
+    public void draw(Graphics2D g2){
         if(!panel.isVisible())return;
 
-        Graphics g = panel.getGraphics();
-        Graphics2D g2 = (Graphics2D) g;
-
         laserBeam = new Rectangle2D.Double(xCord, yCord, width, height);
-        
         g2.setColor(laserColor);
         g2.fill(laserBeam);
-
-        g.dispose();
     }
     public void erase(){
         if(!panel.isVisible())return;

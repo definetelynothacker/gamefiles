@@ -1,5 +1,4 @@
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.Rectangle2D;
@@ -13,13 +12,17 @@ public class UFO{//player
     private final int yCord;
     private final Random random;
 
-    public static int health=1000;
+    public static double health=1000;
+    public static double healthIncr=1000;
+    public static int amtDestroyed=0;
+    private static double healthDamageGrowth=1.15;
+    private static double healthBarFactor=1;
     
     private final int width;
     private final int height;
 
     private Rectangle2D healthBar, healthBarBorder;
-    private static int healthBarAmt=50;//1000/20 = 50, 50 shots kills ufo, therefor every shot should -=1;
+    private static double healthBarAmt=50;//1000/20 = 50, 50 shots kills ufo, therefor every shot should -=1;
 
     private Rectangle2D.Double spaceship;
     private final Image defaultImage, explosionImage;
@@ -27,7 +30,7 @@ public class UFO{//player
     //flags
     private static boolean isExploded;
     private static boolean is3SecondsElapsed;
-    private static boolean gotTime;
+    private static boolean gotTime, playerGotPoints;
 
     private long explosionStartTime;
     private long currentTime;
@@ -56,12 +59,9 @@ public class UFO{//player
 
         dx = 25;//speed
 
-        isExploded = is3SecondsElapsed = gotTime = false;
+        isExploded = is3SecondsElapsed = gotTime = playerGotPoints = false;
     }
-    public void draw(){
-        Graphics g = panel.getGraphics();
-        Graphics2D g2 = (Graphics2D) g;
-
+    public void draw(Graphics2D g2){
         healthBar = new Rectangle2D.Double(xCord, yCord+height+3, healthBarAmt, height/4);
         healthBarBorder = new Rectangle2D.Double(xCord, yCord+height+3, width, height/4);
 
@@ -70,17 +70,23 @@ public class UFO{//player
         g2.fill(healthBar);
 
         g2.draw(healthBar);
+        if(amtDestroyed<=5){
         if(!isExploded)
             g2.draw(healthBarBorder);
 
         if(health>0)
             g2.drawImage(defaultImage, xCord, yCord, width, height, null);
+        
         else if(!is3SecondsElapsed){//if dead and time has not crossed 3 seconds draw explosion
             g2.drawImage(explosionImage, xCord, yCord, width, height, null);
             isExploded = true;
             if(!gotTime){
                 explosionStartTime = System.currentTimeMillis();
                 gotTime = true;
+                amtDestroyed++;
+            }
+            if(!playerGotPoints){
+                ScoringPanel.destroyUFO();
             }
             currentTime = System.currentTimeMillis();
             timeElapsed = currentTime - explosionStartTime;
@@ -90,7 +96,8 @@ public class UFO{//player
         else if(is3SecondsElapsed){//after 3 seconds passed draw grave image
             g2.drawImage(ImageManager.loadImage("bg2.jpg"), xCord, yCord, xCord + width, yCord + height, xCord, yCord, xCord + width, yCord + height, null);
         }
-        g.dispose();
+    }
+        
     }
     public void move(){
         if(!panel.isVisible())return;//if visible move, else don't
@@ -149,13 +156,15 @@ public class UFO{//player
     }
     public void gotShootBySpaceshipLaser(){
         health-=20;
-        healthBarAmt-=1;
+        healthBarAmt-=healthBarFactor;
     }
     public static boolean getIsExploded(){return UFO.isExploded;}
 
     public static void resetUFO(){
-        UFO.health = 1000;
-        UFO.healthBarAmt = 50;
+        UFO.health = UFO.healthIncr*UFO.healthDamageGrowth;
+        UFO.healthIncr*=UFO.healthDamageGrowth;
+        UFO.healthBarAmt = 50*UFO.healthDamageGrowth;
+        UFO.healthBarFactor *=UFO.healthDamageGrowth;
        
         //flags
         UFO.isExploded = false;

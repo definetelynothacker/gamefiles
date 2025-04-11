@@ -19,6 +19,8 @@ public class Health {
 
     private final Random random;
 
+    public static boolean collected;
+
     public Health(JPanel panel, int xCord, int yCord, Spaceship spaceship){
         this.height = 25;
         this.width = 25;
@@ -34,6 +36,7 @@ public class Health {
         this.random = new Random();
 
         image = ImageManager.loadImage("first-aid-kit.png");
+        collected = false;
 
         setLocation();
     }
@@ -42,12 +45,8 @@ public class Health {
         xCord = random.nextInt(panelWidth - width);
         yCord = 10;
     }
-    public void draw(){
-        Graphics g = panel.getGraphics();
-        Graphics2D g2 = (Graphics2D) g;
-
+    public void draw(Graphics2D g2){
         g2.drawImage(image, xCord, yCord, width, height, null);
-        g.dispose();
     }
     public Rectangle2D.Double getBoundingRectangle(){
         return new Rectangle2D.Double (xCord, yCord, width, height);
@@ -68,6 +67,7 @@ public class Health {
 
         if(collidesWithSpaceship() && !Spaceship.getIsExploded()){
             ScoringPanel.addHealth();
+            collected = true;
             setLocation();
         }
         yCord += dy;

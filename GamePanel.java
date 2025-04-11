@@ -1,13 +1,12 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.awt.image.BufferedImage;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JWindow;
@@ -30,57 +29,72 @@ public class GamePanel extends JPanel implements Runnable{
 
    private static CopyOnWriteArrayList<LaserBeam> laserBeams;
    private static CopyOnWriteArrayList<LaserBeam> laserBeamsUFO;
+   private static CopyOnWriteArrayList<ForceField> forceFields;
 
-   private boolean isRunning;
+   private boolean isRunning, isPaused;
 
-   private final Image backgroundImage;
+   private BufferedImage image;
+   private Background background;
+
+   private SoundManager soundManager;
    private Thread gameThread;
    private long lastTime, lastTimeExploded=0, currentTime;
    private final Random random;
+
+   private HeatAnimation heatAnimation;
+   
+
+   //sound flags
+   private boolean explosionSoundPlayedUFO, explosionSoundPlayedSpaceship;
 
    public GamePanel(){
 
       spaceship = null;
       ufo = null;
       asteroids = null;
+      forceFields = null;
+
 
       healthPkg = null;
       ammoPkg = null;
 
       laserBeams = null;
 
-      isRunning = false;
+      explosionSoundPlayedUFO = explosionSoundPlayedSpaceship = isRunning = false;
+      isPaused = false;
 
       random = new Random();
       lastTime = System.currentTimeMillis();
 
-      backgroundImage = ImageManager.loadImage("bg2.jpg");
+      image = new BufferedImage(400, 400, BufferedImage.TYPE_INT_RGB);
+      soundManager = SoundManager.getInstance();
+      //backgroundImage = ImageManager.loadImage("bg2.jpg");
    }
 
    public void createGameEntities(){
       int panelWidth = this.getWidth();
 
+      background = new Background(this, "bg2.jpg", 96);
       spaceship = new Spaceship(this, 65, 75);
       ufo = new UFO(this, 150, 0);
       asteroids = new Asteroid[NUM_ASTEROIDS];
       ammoPkg = new Ammo(this, random.nextInt(panelWidth), 10, spaceship);
       healthPkg = new Health(this, random.nextInt(panelWidth), 10, spaceship);
-
       laserBeams = new CopyOnWriteArrayList<>();
+      forceFields = new CopyOnWriteArrayList<>();
       laserBeamsUFO = new CopyOnWriteArrayList<>();
+      heatAnimation = new HeatAnimation(spaceship.getXCord()+25, spaceship.getYCord()+25);
 
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i] = new Asteroid(this, random.nextInt(panelWidth), 10, spaceship);
       }
    }
-
-   public void drawGameEntities(){
-      if (spaceship != null)
-         spaceship.draw();
-   }
    public void updateGameEntities(int direction){
       if(spaceship == null)
          return;
+
+      if(background!=null)
+         background.move(direction);
    
       spaceship.erase();
       spaceship.move(direction);
@@ -90,7 +104,9 @@ public class GamePanel extends JPanel implements Runnable{
          return true;
       return y1 >= y2 && y1 <= (y2+height2);
    }
-
+   public void updateSpaceship(int direction){
+      spaceship.move(direction);
+   }
    //Asteroid
    //
    //
@@ -124,12 +140,17 @@ public class GamePanel extends JPanel implements Runnable{
    }
    public void createLaser(){
       LaserBeam newLaserBeam = new LaserBeam(this, spaceship.getXCord()+7, spaceship.getYCord()+25, true, Color.BLUE, false);
+      boolean laserSoundPlayer=false;
+      if(!laserSoundPlayer){
+         soundManager.playClip("laser", false);
+         laserSoundPlayer=true;
+      }
       laserBeams.add(newLaserBeam);
    }
-   public void moveRenderLaser(){
+   public void moveRenderLaser(Graphics2D imageContext){
       for(LaserBeam laserBeam: laserBeams){
          if(laserBeam!=null && laserBeam.canMove){
-            laserBeam.draw();
+            laserBeam.draw(imageContext);
             laserBeam.move(1);
             laserBeam.erase();
          }
@@ -143,10 +164,10 @@ public class GamePanel extends JPanel implements Runnable{
       LaserBeam newLaserBeam = new LaserBeam(this, ufo.getXCord()+7, ufo.getYCord()+ufo.getHeight(), false, Color.RED, true);
       laserBeamsUFO.add(newLaserBeam);
    }
-   public void renderUFOLaser(){
+   public void renderUFOLaser(Graphics2D imageContext){
       for(LaserBeam laserBeam: laserBeamsUFO){
          if(laserBeam!=null && laserBeam.canMove && !UFO.getIsExploded()){
-            laserBeam.draw();
+            laserBeam.draw(imageContext);
             laserBeam.move(2);
             laserBeam.erase();
          }
@@ -163,28 +184,41 @@ public class GamePanel extends JPanel implements Runnable{
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i].move();
       }
+      heatAnimation.update();
    }
    public void gameRender(){
-      Graphics g = getGraphics();
-      Graphics2D g2 = (Graphics2D) g;
-      g2.drawImage(backgroundImage, 0, 0, null);
+      Graphics2D imageContext = (Graphics2D) image.getGraphics();
+      background.draw(imageContext);
 
       if(spaceship != null)
-         spaceship.draw();
+         spaceship.draw(imageContext);
 
       if(ammoPkg != null)
-         ammoPkg.draw();
+         ammoPkg.draw(imageContext);
 
       if(healthPkg != null)
-         healthPkg.draw();
+         healthPkg.draw(imageContext);
 
       if(ufo != null)
-         ufo.draw();
-
+         ufo.draw(imageContext);
+      if(heatAnimation!=null){
+         heatAnimation.draw(imageContext);
+      }
       if(asteroids != null){
          for(int i = 0; i<NUM_ASTEROIDS; i++)
-            asteroids[i].draw();
+            asteroids[i].draw(imageContext);
       }
+      moveRenderLaser(imageContext);
+      renderUFOLaser(imageContext);
+      renderForceField(imageContext);
+      Graphics2D g2 = (Graphics2D) getGraphics();
+		g2.drawImage(image, 0, 0, 400, 400, null);
+
+		imageContext.dispose();
+		g2.dispose();
+   }
+   public static void switchContext(){
+      
    }
    public boolean isOnAsteroid(int x, int y){
       for(int i = 0; i<NUM_ASTEROIDS; i++){
@@ -198,11 +232,6 @@ public class GamePanel extends JPanel implements Runnable{
    //Spaceship
    //
    //
-   public void updateSpaceship(int direction){
-      if(spaceship!=null)
-         spaceship.move(direction);
-   }
-
    public boolean isOnSpaceShip(int x, int y){
       return spaceship.isOnSpaceShip(x, y);
    }
@@ -214,23 +243,55 @@ public class GamePanel extends JPanel implements Runnable{
    }
    //
    //
-
+   public void startForceField(){
+      ForceField newForceField = new ForceField(this, spaceship.getXCord()+10, spaceship.getXCord()+10);
+      forceFields.add(newForceField);
+      Spaceship.amtForcefields-=1;
+      GameWindow.xPressed = false;
+   }
+   public void renderForceField(Graphics2D imageContext){
+      for(ForceField forceField: forceFields){
+         forceField.draw(imageContext);
+         forceField.move();
+         //when rad = screen width: STOP
+         if(forceField.getRadius() >= 400){
+            forceFields.remove(forceField);//after can't grow, remove form list
+         }
+      }
+   }
    @Override
    public void run(){
       try{
          isRunning = true;
          while(isRunning){
-            gameUpdate();
-            gameRender();
-            moveRenderLaser();
-            renderUFOLaser();
+            if(!isPaused){
+               gameUpdate();
+               gameRender();
             currentTime = System.currentTimeMillis();
-
+            if(heatAnimation!=null){
+               heatAnimation.start();
+            }
             if(currentTime - lastTime > 1500 && !UFO.getIsExploded()){//only shoots if not exploded
                shootUFOLaser();
                lastTime = currentTime;
             }
+            if(Spaceship.isExploded && !explosionSoundPlayedSpaceship){
+               soundManager.playClip("explosion", false);
+               explosionSoundPlayedSpaceship = true;
+            }
+            if(Ammo.collected){
+               Ammo.collected = false;
+               soundManager.playClip("reload", false);
+            }
+            if(Health.collected){
+               Health.collected = false;
+               soundManager.playClip("powerup", false);
+            }
             if(UFO.getIsExploded()){
+               if(!explosionSoundPlayedUFO){
+                  soundManager.playClip("explosions", false);
+                  //explosionSoundPlayedUFO=true;
+               }
                if (lastTimeExploded == 0) {
                    lastTimeExploded = System.currentTimeMillis();
                }
@@ -238,18 +299,73 @@ public class GamePanel extends JPanel implements Runnable{
                    UFO.resetUFO();
                    lastTimeExploded = 0;
                }
-           }
-           
+            }
+               if(GameWindow.xPressed && !Spaceship.isExploded){//xpressed=true assumed player had enough points to buy laser
+                  startForceField();
+               }
+
+               if(GameWindow.spacePressed && Spaceship.amtLasers>0 && spaceship.canShoot()){
+                  createLaser();
+                  AmmoPanel.decreaseAmmo();
+                  GameWindow.spacePressed = false;
+               }
+            }
+            Thread.sleep(50);
+            /*
+            gameRender();
+            currentTime = System.currentTimeMillis();
+
+            if(currentTime - lastTime > 1500 && !UFO.getIsExploded()){//only shoots if not exploded
+               shootUFOLaser();
+               lastTime = currentTime;
+            }
+            if(Spaceship.isExploded && !explosionSoundPlayedSpaceship){
+               soundManager.playClip("explosion", false);
+               explosionSoundPlayedSpaceship = true;
+            }
+            if(Ammo.collected){
+               Ammo.collected = false;
+               soundManager.playClip("reload", false);
+            }
+            if(Health.collected){
+               Health.collected = false;
+               soundManager.playClip("powerup", false);
+            }
+            if(UFO.getIsExploded()){
+               if(!explosionSoundPlayedUFO){
+                  soundManager.playClip("explosions", false);
+                  //explosionSoundPlayedUFO=true;
+               }
+               
+               if (lastTimeExploded == 0) {
+                   lastTimeExploded = System.currentTimeMillis();
+               }
+               if(currentTime - lastTimeExploded > 15000){
+                   UFO.resetUFO();
+                   lastTimeExploded = 0;
+               }
+            }
+            if(GameWindow.xPressed && !Spaceship.isExploded){//xpressed=true assumed player had enough points to buy laser
+               startForceField();
+            }
 
             if(GameWindow.spacePressed && Spaceship.amtLasers>0 && spaceship.canShoot()){
                createLaser();
                AmmoPanel.decreaseAmmo();
                GameWindow.spacePressed = false;
             }
-            Thread.sleep(50);
+            Thread.sleep(50);*/
          }
       }
       catch(InterruptedException e){}
    }
+   public void pauseGame(){
+		isPaused = !isPaused;
+	}
+
+
+	public void endGame(){
+		isRunning = false;
+	}
 
 }

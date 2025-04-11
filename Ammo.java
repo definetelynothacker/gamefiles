@@ -21,6 +21,7 @@ public class Ammo {
     private final Image image;
 
     private final JPanel panel;
+    public static boolean collected;
 
     public Ammo(JPanel panel, int xCord, int yCord, Spaceship spaceship){
         image = ImageManager.loadImage("bullets.png");
@@ -37,15 +38,12 @@ public class Ammo {
         this.dy = 5;
 
         random = new Random();
+        collected = false;
 
         setLocation();
     }
-    public void draw(){
-        Graphics g = panel.getGraphics();
-        Graphics2D g2 = (Graphics2D) g;
-
+    public void draw(Graphics2D g2){
         g2.drawImage(image, xCord, yCord, width, height, null);
-        g.dispose();
     }
     public void move(){
         if(!panel.isVisible ())return;
@@ -56,6 +54,7 @@ public class Ammo {
 
         if(collidesWithSpaceship() && !Spaceship.getIsExploded()){
             setLocation();
+            collected = true;
             AmmoPanel.collectAmmoPackage();
         }
 

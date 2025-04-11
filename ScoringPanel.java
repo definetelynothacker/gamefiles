@@ -14,7 +14,9 @@ public class ScoringPanel extends JPanel{
     public static int asteroidCollisionPoints = 5;
     public static int asteroidCollisionHealthDecrease = 20;
     public static int laserShotAsteroidScore = 20;
+    public static int forceFieldDamage=5;
     public static int HEALTH_POINTS = 20;
+    public static int forceFieldCost = 1000;//points
 
         public ScoringPanel(){
     
@@ -45,8 +47,16 @@ public class ScoringPanel extends JPanel{
             this.add(healthTF);
             this.add(livesRemL);
             this.add(livesRemTF);
-        }
-
+    }
+    public static void buyForceField(){
+        Spaceship.score-=forceFieldCost;
+        Spaceship.amtForcefields+=1;
+        scoreTF.setText(Integer.toString(Spaceship.score));
+    }
+    public static void destroyUFO(){
+        Spaceship.score+=forceFieldCost;
+        scoreTF.setText(Integer.toString(Spaceship.score));
+    }
     public static void laserCollisionScore(){
         Spaceship.score+=laserShotAsteroidScore;
         scoreTF.setText(Integer.toString(Spaceship.score));
@@ -54,6 +64,10 @@ public class ScoringPanel extends JPanel{
     public static void addHealth(){
         Spaceship.health+=HEALTH_POINTS;
         healthTF.setText(Integer.toString(Spaceship.health));
+    }
+    public static void addPoints(){
+        Spaceship.score+=laserShotAsteroidScore;
+        scoreTF.setText(Integer.toString(Spaceship.score));
     }
     public static void yesAsteroidCollision(){
         if(!Spaceship.getIsExploded()){

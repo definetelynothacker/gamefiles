@@ -8,13 +8,14 @@ import javax.swing.JPanel;
 public class Spaceship{//player
 
     private final JPanel panel;
-    private int xCord;
-    private int yCord;
+    public static int xCord;
+    public static int yCord;
 
     public static int score=0;
-    public static int health=300;
+    public static int health=350;
     public static int lives_rem=3;
-    public static int amtLasers=25;//amt Ammo
+    public static int amtLasers=25;//amt Ammo\
+    public static int amtForcefields=0;
 
     public boolean hasEnoughLasers;
     
@@ -25,7 +26,7 @@ public class Spaceship{//player
     private final Image defaultImage, explosionImage, graveImage;
 
     //flags
-    private static boolean isExploded;
+    public static boolean isExploded;
     private static boolean is3SecondsElapsed;
     private static boolean gotTime;
     private static boolean canShoot;
@@ -61,9 +62,7 @@ public class Spaceship{//player
         isExploded = is3SecondsElapsed = gotTime = false;
         canShoot = hasEnoughLasers = true;
     }
-    public void draw(){
-        Graphics g = panel.getGraphics();
-        Graphics2D g2 = (Graphics2D) g;
+    public void draw(Graphics2D g2){
         if(health>0){//if not dead draw spaceship
             g2.drawImage(defaultImage, xCord, yCord, width, height, null);
         }
@@ -83,7 +82,6 @@ public class Spaceship{//player
         else if(is3SecondsElapsed){//after 3 seconds passed draw grave image
             g2.drawImage(graveImage, xCord, yCord, width*2, height*2, null);
         }
-        g.dispose();
     }
     public void erase(){
         Graphics g = panel.getGraphics();
@@ -133,10 +131,10 @@ public class Spaceship{//player
             return false;
         return spaceship.contains(xCord, yCord);
     }
-    public int getXCord(){
+    public static int getXCord(){
         return xCord;
     }
-    public int getYCord(){
+    public static int getYCord(){
         return yCord;
     }
     public int getWidth(){

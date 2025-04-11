@@ -10,7 +10,7 @@ public class GameWindow extends JFrame
 	// declare instance variables for user interface objects
 
 	// declare labels 
-	public static boolean spacePressed;
+	public static boolean spacePressed, xPressed;
 
 	private JLabel statusBarL;
 	private JLabel keyL;
@@ -23,12 +23,13 @@ public class GameWindow extends JFrame
 	private final JTextField mouseTF;
 
 	// declare buttons
-
 	private final JButton startB;
 	private final JButton dropAsteroid;
 	private final JButton playAgain;//"play again"
+	private final JButton pauseGame;
 	private final JButton focusB;
 	private final JButton exitB;
+	private final JButton buyForceField;
 
 	private Container c;
 
@@ -39,9 +40,9 @@ public class GameWindow extends JFrame
 
 
 	@SuppressWarnings({"unchecked"})
-	public GameWindow() {
+	public GameWindow(){
 
-		spacePressed = false;
+		spacePressed = xPressed = false;
  
 		setTitle ("A Game with a Bat and an Alien");
 		setSize (750, 750);
@@ -74,7 +75,9 @@ public class GameWindow extends JFrame
 	    dropAsteroid = new JButton ("Drop Asteroids");
 		playAgain = new JButton("Play Again");
 	    focusB = new JButton ("Focus on Key");
-		exitB = new JButton ("Exit");
+		exitB = new JButton ("End game");
+		buyForceField = new JButton("Buy Force Field");
+		pauseGame = new JButton("Pause");
 
 		// add listener to each button (same as the current object)
 
@@ -83,6 +86,8 @@ public class GameWindow extends JFrame
 		playAgain.addActionListener(this);
 		focusB.addActionListener(this);
 		exitB.addActionListener(this);
+		buyForceField.addActionListener(this);
+		pauseGame.addActionListener(this);
 
 		
 		// create mainPanel
@@ -133,9 +138,11 @@ public class GameWindow extends JFrame
 
 		buttonPanel.add(startB);
 		buttonPanel.add(dropAsteroid);
+		buttonPanel.add(pauseGame);
 		buttonPanel.add(playAgain);
 		buttonPanel.add(focusB);
 		buttonPanel.add(exitB);
+		buttonPanel.add(buyForceField);
 
 		// add sub-panels with GUI objects to mainPanel and set its colour
 
@@ -180,10 +187,10 @@ public class GameWindow extends JFrame
 
 		if (command.equals(focusB.getText()))
 			mainPanel.requestFocus();
-
 		if (command.equals(startB.getText()))
 			gamePanel.gameRender();
-
+		if(command.equals(pauseGame.getText()))
+			gamePanel.pauseGame();
 		if (command.equals(dropAsteroid.getText())){
 			gamePanel.dropAsteroid();
 		}
@@ -192,6 +199,9 @@ public class GameWindow extends JFrame
 		}
 		if (command.equals(exitB.getText()))
 			System.exit(0);
+		if(command.equals(buyForceField.getText()) && Spaceship.score>=1000){//add to Spaceship force field amts
+			ScoringPanel.buyForceField();
+		}
 
 		mainPanel.requestFocus();
 	}
@@ -223,12 +233,15 @@ public class GameWindow extends JFrame
 		if(keyCode == KeyEvent.VK_SPACE){
 			spacePressed = true;
 		}
+		if(keyCode == KeyEvent.VK_X && Spaceship.amtForcefields>0){//will only set true if amtForcefields>0
+			xPressed = true;
+		}
 	}
-	public void keyReleased(KeyEvent e) {
+	public void keyReleased(KeyEvent e){
 
 	}
 
-	public void keyTyped(KeyEvent e) {
+	public void keyTyped(KeyEvent e){
 
 	}
 
