@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -22,10 +23,12 @@ public class Ammo {
 
     private final JPanel panel;
     public static boolean collected;
+    private final Color bgColor;
 
     public Ammo(JPanel panel, int xCord, int yCord, Spaceship spaceship){
         image = ImageManager.loadImage("bullets.png");
         this.panel = panel;
+        bgColor = panel.getBackground();
         
         this.width = 25;
         this.height = 25;
@@ -44,6 +47,15 @@ public class Ammo {
     }
     public void draw(Graphics2D g2){
         g2.drawImage(image, xCord, yCord, width, height, null);
+    }
+    public void erase(){
+        Graphics g = panel.getGraphics();
+        Graphics2D g2 = (Graphics2D) g;
+
+        g2.setColor(bgColor);
+        g2.fill(new Rectangle2D.Double(xCord, yCord, width, height));
+
+        g.dispose();
     }
     public void move(){
         if(!panel.isVisible ())return;

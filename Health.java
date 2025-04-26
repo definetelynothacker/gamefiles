@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -20,6 +21,7 @@ public class Health {
     private final Random random;
 
     public static boolean collected;
+    private final Color bgColor;
 
     public Health(JPanel panel, int xCord, int yCord, Spaceship spaceship){
         this.height = 25;
@@ -30,6 +32,7 @@ public class Health {
         this.dy = 5;
 
         this.panel = panel;
+        this.bgColor = panel.getBackground();
 
         this.spaceship = spaceship;
 
@@ -47,6 +50,15 @@ public class Health {
     }
     public void draw(Graphics2D g2){
         g2.drawImage(image, xCord, yCord, width, height, null);
+    }
+    public void erase(){
+        Graphics g = panel.getGraphics();
+        Graphics2D g2 = (Graphics2D) g;
+
+        g2.setColor(bgColor);
+        g2.fill(new Rectangle2D.Double(xCord, yCord, width, height));
+
+        g.dispose();
     }
     public Rectangle2D.Double getBoundingRectangle(){
         return new Rectangle2D.Double (xCord, yCord, width, height);

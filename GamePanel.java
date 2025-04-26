@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.Random;
 import java.util.Timer;
@@ -34,12 +35,17 @@ public class GamePanel extends JPanel implements Runnable{
    private boolean isRunning, isPaused;
 
    private BufferedImage image;
-   private Background background;
+   private Background background;//complete size: width:1920, height:3412 
+   private int actualBgWidth=1920, actualBgHeight=3412;
+   private int chooseXloc, chooseYloc;
+   private int[] planetLocations;
+   private Planet planets[];
 
    private SoundManager soundManager;
    private Thread gameThread;
    private long lastTime, lastTimeExploded=0, currentTime;
    private final Random random;
+   private int levelCounter=2;
 
    private HeatAnimation heatAnimation;
    
@@ -53,7 +59,7 @@ public class GamePanel extends JPanel implements Runnable{
       ufo = null;
       asteroids = null;
       forceFields = null;
-
+      planets = null;
 
       healthPkg = null;
       ammoPkg = null;
@@ -70,10 +76,10 @@ public class GamePanel extends JPanel implements Runnable{
       soundManager = SoundManager.getInstance();
       //backgroundImage = ImageManager.loadImage("bg2.jpg");
    }
-
    public void createGameEntities(){
       int panelWidth = this.getWidth();
-
+      this.planets = new Planet[100];
+      createPlanets();//assign to array
       background = new Background(this, "bg2.jpg", 96);
       spaceship = new Spaceship(this, 65, 75);
       ufo = new UFO(this, 150, 0);
@@ -83,7 +89,7 @@ public class GamePanel extends JPanel implements Runnable{
       laserBeams = new CopyOnWriteArrayList<>();
       forceFields = new CopyOnWriteArrayList<>();
       laserBeamsUFO = new CopyOnWriteArrayList<>();
-      heatAnimation = new HeatAnimation(spaceship.getXCord()+25, spaceship.getYCord()+25);
+      heatAnimation = new HeatAnimation(Spaceship.getXCord()+25, Spaceship.getYCord()+25);
 
       for(int i = 0; i<NUM_ASTEROIDS; i++){
          asteroids[i] = new Asteroid(this, random.nextInt(panelWidth), 10, spaceship);
@@ -105,7 +111,12 @@ public class GamePanel extends JPanel implements Runnable{
       return y1 >= y2 && y1 <= (y2+height2);
    }
    public void updateSpaceship(int direction){
-      spaceship.move(direction);
+      if(spaceship!=null){
+         spaceship.move(direction);
+      }
+      if(background!=null){
+         background.move(direction);
+      }
    }
    //Asteroid
    //
@@ -138,8 +149,31 @@ public class GamePanel extends JPanel implements Runnable{
          }, 3000);
       }
    }
+   public void displayLevelPopup(){
+      JWindow popup = new JWindow();
+      popup.setLayout(new BorderLayout());
+      JLabel messageLabel = new JLabel("Level "+levelCounter, SwingConstants.CENTER);
+      levelCounter++;
+      messageLabel.setFont(new Font("Arial", Font.BOLD, 14));
+      messageLabel.setForeground(Color.WHITE);
+      messageLabel.setOpaque(true);
+      messageLabel.setBackground(new Color(255, 0, 0));
+      popup.add(messageLabel, BorderLayout.CENTER);
+
+      popup.setSize(300, 100);
+      popup.setLocationRelativeTo(null);
+
+      popup.setVisible(true);
+
+      new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+               popup.dispose();
+            }
+      }, 3000);
+   }
    public void createLaser(){
-      LaserBeam newLaserBeam = new LaserBeam(this, spaceship.getXCord()+7, spaceship.getYCord()+25, true, Color.BLUE, false);
+      LaserBeam newLaserBeam = new LaserBeam(this, Spaceship.getXCord()+7, Spaceship.getYCord()+25, true, Color.BLUE, false);
       boolean laserSoundPlayer=false;
       if(!laserSoundPlayer){
          soundManager.playClip("laser", false);
@@ -188,16 +222,19 @@ public class GamePanel extends JPanel implements Runnable{
    }
    public void gameRender(){
       Graphics2D imageContext = (Graphics2D) image.getGraphics();
+      super.paintComponent(imageContext);
       background.draw(imageContext);
 
       if(spaceship != null)
          spaceship.draw(imageContext);
 
-      if(ammoPkg != null)
+      if(ammoPkg != null){
          ammoPkg.draw(imageContext);
+      }
 
-      if(healthPkg != null)
+      if(healthPkg != null){
          healthPkg.draw(imageContext);
+      }
 
       if(ufo != null)
          ufo.draw(imageContext);
@@ -205,20 +242,19 @@ public class GamePanel extends JPanel implements Runnable{
          heatAnimation.draw(imageContext);
       }
       if(asteroids != null){
-         for(int i = 0; i<NUM_ASTEROIDS; i++)
+         for(int i = 0; i<NUM_ASTEROIDS; i++){
             asteroids[i].draw(imageContext);
+         }
       }
       moveRenderLaser(imageContext);
       renderUFOLaser(imageContext);
       renderForceField(imageContext);
+      renderPlanets(imageContext);
       Graphics2D g2 = (Graphics2D) getGraphics();
 		g2.drawImage(image, 0, 0, 400, 400, null);
 
 		imageContext.dispose();
 		g2.dispose();
-   }
-   public static void switchContext(){
-      
    }
    public boolean isOnAsteroid(int x, int y){
       for(int i = 0; i<NUM_ASTEROIDS; i++){
@@ -228,6 +264,21 @@ public class GamePanel extends JPanel implements Runnable{
    }
    //
    //
+   
+   //planets
+   public void createPlanets(){
+      for(int i=0; i<100; i++){
+         chooseXloc = random.nextInt(1884);//1920-36 since it can't gen out of bounds for visuals
+         chooseYloc = random.nextInt(3376);//3412-36
+         planets[i] = new Planet(this, chooseXloc, chooseYloc, spaceship);
+      }
+   }
+   public void renderPlanets(Graphics2D imageContext){
+      for(int i=0; i<100; i++){
+         planets[i].draw(imageContext);
+      }
+   }
+
 
    //Spaceship
    //
@@ -244,7 +295,7 @@ public class GamePanel extends JPanel implements Runnable{
    //
    //
    public void startForceField(){
-      ForceField newForceField = new ForceField(this, spaceship.getXCord()+10, spaceship.getXCord()+10);
+      ForceField newForceField = new ForceField(this, Spaceship.getXCord()+10, Spaceship.getXCord()+10);
       forceFields.add(newForceField);
       Spaceship.amtForcefields-=1;
       GameWindow.xPressed = false;
@@ -259,6 +310,7 @@ public class GamePanel extends JPanel implements Runnable{
          }
       }
    }
+
    @Override
    public void run(){
       try{
@@ -289,15 +341,17 @@ public class GamePanel extends JPanel implements Runnable{
             }
             if(UFO.getIsExploded()){
                if(!explosionSoundPlayedUFO){
-                  soundManager.playClip("explosions", false);
-                  //explosionSoundPlayedUFO=true;
+                  soundManager.playClip("explosion", false);
+                  explosionSoundPlayedUFO=true;
                }
                if (lastTimeExploded == 0) {
-                   lastTimeExploded = System.currentTimeMillis();
+                  lastTimeExploded = System.currentTimeMillis();
                }
-               if(currentTime - lastTimeExploded > 15000){
-                   UFO.resetUFO();
-                   lastTimeExploded = 0;
+               if((currentTime - lastTimeExploded) > 15000){
+                  displayLevelPopup();
+                  UFO.resetUFO();
+                  explosionSoundPlayedUFO = false;
+                  lastTimeExploded = 0;
                }
             }
                if(GameWindow.xPressed && !Spaceship.isExploded){//xpressed=true assumed player had enough points to buy laser

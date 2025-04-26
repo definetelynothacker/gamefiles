@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -22,6 +23,7 @@ public final class Asteroid{
     private final JPanel panel;
 
     private final Image asteroidImage;
+    private final Color bgColor;
     
     public Asteroid(JPanel panel, int xCord, int yCord, Spaceship spaceship){
         
@@ -29,6 +31,7 @@ public final class Asteroid{
         this.xCord = xCord;
         this.yCord = yCord;
         this.panel = panel;
+        this.bgColor = panel.getBackground();
 
         random = new Random();
 
@@ -49,6 +52,15 @@ public final class Asteroid{
     }
     public void draw(Graphics2D g2){
         g2.drawImage(asteroidImage, xCord, yCord, width, height, null);
+    }
+    public void erase(){
+        Graphics g = panel.getGraphics();
+        Graphics2D g2 = (Graphics2D) g;
+
+        g2.setColor(bgColor);
+        g2.fill(new Rectangle2D.Double(xCord, yCord, width, height));
+
+        g.dispose();
     }
     public void move(){
         if(!panel.isVisible ())return;

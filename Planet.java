@@ -27,20 +27,16 @@ public final class Planet{
 
         width = 36;
         height = 36;
-
-        images[0] = ImageManager.loadImage("/planetImages/earth.png");
-        images[1] = ImageManager.loadImage("/planetImages/mars.png");
-        images[2] = ImageManager.loadImage("/planetImages/saturn_b.png");
-        images[3] = ImageManager.loadImage("/planetImages/saturn_y.png");
+        this.images = new Image[4];
+        images[0] = ImageManager.loadImage("planetImages/earth.png");
+        images[1] = ImageManager.loadImage("planetImages/mars.png");
+        images[2] = ImageManager.loadImage("planetImages/saturn_b.png");
+        images[3] = ImageManager.loadImage("planetImages/saturn_y.png");
         Random random = new Random();
         chooseImage = images[random.nextInt(4)];
     }
-    public void draw(){
-        Graphics g = panel.getGraphics();
-        Graphics2D g2 = (Graphics2D) g;
-
+    public void draw(Graphics2D g2){
         g2.drawImage(chooseImage, xCord, yCord, width, height, null);
-        g.dispose();
     }
     public boolean isOnAsteroid(int xCord, int yCord){
         if(chooseImage == null)

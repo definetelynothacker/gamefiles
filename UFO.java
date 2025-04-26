@@ -12,17 +12,16 @@ public class UFO{//player
     private final int yCord;
     private final Random random;
 
-    public static double health=1000;
-    public static double healthIncr=1000;
+    public static double health;
     public static int amtDestroyed=0;
-    private static double healthDamageGrowth=1.15;
-    private static double healthBarFactor=1;
     
     private final int width;
     private final int height;
 
     private Rectangle2D healthBar, healthBarBorder;
-    private static double healthBarAmt=50;//1000/20 = 50, 50 shots kills ufo, therefor every shot should -=1;
+    private static double healthBarAmt;
+    public static int ufoLives=4;
+    private static double ufoHealthToDecrease[] = {1, 2, 3, 4, 5};//50 is the length so -1= 5 shots to kill
 
     private Rectangle2D.Double spaceship;
     private final Image defaultImage, explosionImage;
@@ -53,8 +52,8 @@ public class UFO{//player
         yCord = yPos;
 
         random = new Random();
-
-        width = 50;
+        health = 200;//since at arr[4] = 5, 50/5 = 10 shots, 200 health 
+        healthBarAmt = width = 50;
         height = 50;
 
         dx = 25;//speed
@@ -67,12 +66,12 @@ public class UFO{//player
 
         g2.setColor(Color.RED);
 
-        g2.fill(healthBar);
-
-        g2.draw(healthBar);
         if(amtDestroyed<=5){
-        if(!isExploded)
+        if(!isExploded){
             g2.draw(healthBarBorder);
+            g2.fill(healthBar);
+            g2.draw(healthBar);
+        }
 
         if(health>0)
             g2.drawImage(defaultImage, xCord, yCord, width, height, null);
@@ -93,8 +92,9 @@ public class UFO{//player
             if(timeElapsed>3000)
                 is3SecondsElapsed = true;
         }
-        else if(is3SecondsElapsed){//after 3 seconds passed draw grave image
+        else if(is3SecondsElapsed){
             g2.drawImage(ImageManager.loadImage("bg2.jpg"), xCord, yCord, xCord + width, yCord + height, xCord, yCord, xCord + width, yCord + height, null);
+            
         }
     }
         
@@ -156,19 +156,20 @@ public class UFO{//player
     }
     public void gotShootBySpaceshipLaser(){
         health-=20;
-        healthBarAmt-=healthBarFactor;
+        healthBarAmt -= ufoHealthToDecrease[ufoLives];///essentially how much laser shots will equate health to zero
     }
     public static boolean getIsExploded(){return UFO.isExploded;}
 
     public static void resetUFO(){
-        UFO.health = UFO.healthIncr*UFO.healthDamageGrowth;
-        UFO.healthIncr*=UFO.healthDamageGrowth;
-        UFO.healthBarAmt = 50*UFO.healthDamageGrowth;
-        UFO.healthBarFactor *=UFO.healthDamageGrowth;
-       
-        //flags
-        UFO.isExploded = false;
-        UFO.gotTime = false;
-        UFO.is3SecondsElapsed = false;
+        if(ufoLives>0){
+            UFO.ufoLives-=1;//initially = 4
+            UFO.healthBarAmt = 50;//width
+            UFO.health = (50/ufoHealthToDecrease[ufoLives])*20;
+            //flags
+            UFO.isExploded = false;
+            UFO.gotTime = false;
+            UFO.is3SecondsElapsed = false;
+            UFO.playerGotPoints = false;
+        }
     }
 }
